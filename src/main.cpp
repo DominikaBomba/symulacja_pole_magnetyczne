@@ -10,32 +10,6 @@ using namespace std;
 #include <glm/glm.hpp> // dla pozycji
 #include <glad/glad.h>
 
-class Charge {
-public:
-    glm::vec2 position; // pozycja w oknie
-    float radius;       // promieñ kó³ka
-    glm::vec3 color;    // kolor (RGB)
-
-    Charge(glm::vec2 pos, float r, glm::vec3 col)
-        : position(pos), radius(r), color(col) {
-    }
-
-    void Draw() {
-        glColor3f(color.r, color.g, color.b); // ustaw kolor
-
-        glBegin(GL_TRIANGLE_FAN); // rysujemy wype³nione kó³ko
-        glVertex2f(position.x, position.y); // œrodek
-
-        int numSegments = 50; // im wiêcej segmentów, tym bardziej okr¹g³e
-        for (int i = 0; i <= numSegments; i++) {
-            float angle = i * 2.0f * 3.1415926f / numSegments;
-            float x = position.x + cos(angle) * radius;
-            float y = position.y + sin(angle) * radius;
-            glVertex2f(x, y);
-        }
-        glEnd();
-    }
-};
 
 //kiedy zmieniamy rozmiar okna, funkcja jest wywo³ywana 
 //(mówi openGL która czêœæ okna bêdzie renderowana)
@@ -84,8 +58,7 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    Charge electron({ 0.0f, 0.0f }, 0.05f, { 0.0f, 0.0f, 1.0f }); // niebieski elektron
-
+    
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
@@ -96,8 +69,8 @@ int main()
 
         ImGui::Begin("Witaj w ImGui!");
         ImGui::Text("Gdzie elektron");
-        // w pêtli renderowania, zamiast ImGui::Text:
-        electron.Draw();
+        ImGui::Bullet(); //kropka
+        ImGui::Button("hej"); //przycisk
         ImGui::End();
 
         ImGui::Render();

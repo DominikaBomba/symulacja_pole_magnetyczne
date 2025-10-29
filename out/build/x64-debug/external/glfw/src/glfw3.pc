@@ -1,7 +1,7 @@
-prefix=C:/Users/Dominika Bomba/Desktop/elektron_w_polu/out/install/x64-debug
+prefix=C:/Users/Nikodem/Documents/LearningOpenGL/elektron_w_polu/out/install/x64-debug
 exec_prefix=${prefix}
-includedir=C:/Users/Dominika Bomba/Desktop/elektron_w_polu/out/install/x64-debug/include
-libdir=C:/Users/Dominika Bomba/Desktop/elektron_w_polu/out/install/x64-debug/lib
+includedir=C:/Users/Nikodem/Documents/LearningOpenGL/elektron_w_polu/out/install/x64-debug/include
+libdir=C:/Users/Nikodem/Documents/LearningOpenGL/elektron_w_polu/out/install/x64-debug/lib
 
 Name: GLFW
 Description: A multi-platform library for OpenGL, window and input

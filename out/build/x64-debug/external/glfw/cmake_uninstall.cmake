@@ -1,9 +1,9 @@
 
-if (NOT EXISTS "C:/Users/Dominika Bomba/Desktop/elektron_w_polu/out/build/x64-debug/external/glfw/install_manifest.txt")
-    message(FATAL_ERROR "Cannot find install manifest: \"C:/Users/Dominika Bomba/Desktop/elektron_w_polu/out/build/x64-debug/external/glfw/install_manifest.txt\"")
+if (NOT EXISTS "C:/Users/Nikodem/Documents/LearningOpenGL/elektron_w_polu/out/build/x64-debug/external/glfw/install_manifest.txt")
+    message(FATAL_ERROR "Cannot find install manifest: \"C:/Users/Nikodem/Documents/LearningOpenGL/elektron_w_polu/out/build/x64-debug/external/glfw/install_manifest.txt\"")
 endif()
 
-file(READ "C:/Users/Dominika Bomba/Desktop/elektron_w_polu/out/build/x64-debug/external/glfw/install_manifest.txt" files)
+file(READ "C:/Users/Nikodem/Documents/LearningOpenGL/elektron_w_polu/out/build/x64-debug/external/glfw/install_manifest.txt" files)
 string(REGEX REPLACE "\n" ";" files "${files}")
 
 foreach (file ${files})
