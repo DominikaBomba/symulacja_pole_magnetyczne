@@ -3,11 +3,11 @@
 cmake_policy(SET CMP0009 NEW)
 
 # SOURCES at CMakeLists.txt:8 (file)
-file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "C:/Users/Nikodem/Documents/LearningOpenGL/elektron_w_polu/src/*.cpp")
+file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "C:/Users/Nikodem/Documents/GitHub/symulacja_pole_magnetyczne/src/*.cpp")
 set(OLD_GLOB
-  "C:/Users/Nikodem/Documents/LearningOpenGL/elektron_w_polu/src/main.cpp"
+  "C:/Users/Nikodem/Documents/GitHub/symulacja_pole_magnetyczne/src/main.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
-  file(TOUCH_NOCREATE "C:/Users/Nikodem/Documents/LearningOpenGL/elektron_w_polu/out/build/x64-debug/CMakeFiles/cmake.verify_globs")
+  file(TOUCH_NOCREATE "C:/Users/Nikodem/Documents/GitHub/symulacja_pole_magnetyczne/out/build/x64-debug/CMakeFiles/cmake.verify_globs")
 endif()

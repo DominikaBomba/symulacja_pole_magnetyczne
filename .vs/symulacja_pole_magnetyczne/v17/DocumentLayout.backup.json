@@ -1,0 +1,83 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\CMakePresets.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:CMakePresets.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\elektron_w_polu\\CMakeLists.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:elektron_w_polu\\CMakeLists.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\src\\main.cpp",
+              "RelativeDocumentMoniker": "src\\main.cpp",
+              "ToolTip": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\src\\main.cpp",
+              "RelativeToolTip": "src\\main.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-29T20:55:06.569Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CMakePresets.json",
+              "DocumentMoniker": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\CMakePresets.json",
+              "RelativeDocumentMoniker": "CMakePresets.json",
+              "ToolTip": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\CMakePresets.json",
+              "RelativeToolTip": "CMakePresets.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-29T20:48:43.539Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CMakeLists.txt",
+              "DocumentMoniker": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\elektron_w_polu\\CMakeLists.txt",
+              "RelativeDocumentMoniker": "elektron_w_polu\\CMakeLists.txt",
+              "ToolTip": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\elektron_w_polu\\CMakeLists.txt",
+              "RelativeToolTip": "elektron_w_polu\\CMakeLists.txt",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2025-10-29T20:45:50.343Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -14,9 +14,10 @@
   "ExpandedNodes": [
     "",
     "\\external",
+    "\\external\\imgui\\examples",
     "\\external\\imgui\\examples\\example_allegro5",
     "\\src"
   ],
-  "SelectedNode": "\\CMakePresets.json",
+  "SelectedNode": "\\src\\main.cpp",
   "PreviewInSolutionExplorer": false
 }
