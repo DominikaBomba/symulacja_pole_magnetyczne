@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.16)
 project(OpenGLApp)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -6,16 +6,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Główne źródła
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
+
+# Dodanie executabla (bez nagłówków)
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # GLFW
 add_subdirectory(external/glfw)
-target_link_libraries(${PROJECT_NAME} glfw)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 
 # GLAD
-add_library(glad external/glad/src/glad.c)
+add_library(glad STATIC external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
-target_link_libraries(${PROJECT_NAME} glad)
+target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 
 # GLM
 target_include_directories(${PROJECT_NAME} PUBLIC external/glm)
@@ -35,5 +37,5 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${IMGUI_DIR}/backends
 )
 
-# INCLUDE
+# Inne katalogi include (opcjonalne)
 target_include_directories(${PROJECT_NAME} PRIVATE include external/glfw/include external/glad/include)
