@@ -6,7 +6,7 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "Particle.h"
 
-#pragma once
+
 #include <glm/glm.hpp> // dla pozycji
 #include <glad/glad.h>
 // Funkcja pomocnicza do kompilacji shaderów
@@ -40,10 +40,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 int main()
 {
-    Particle particle({ 0.0, 0.0 }, { 1.0, 0.0 }, 1.0, 1.0);
+    Particle particle({ 0.0, 0.0 }, { 1.0, 0.0 }, 1.0, 0.1);
     double Bz = 1.0;
     double dt = 0.001;
-    double masa = 0.1;
     bool simulate = false;
     //glfwInit uruchamia nam t� biblioreke GLFW - odpowiada za wygenerowanie okna
     if (!glfwInit()) {
@@ -59,7 +58,7 @@ int main()
 
     //funkcja glfwCreateWindow tworzy nam okno 
     //glfwTerminate "sprzata po glfw" zamyka wszsystkie okna itd
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Tu damy tytu�:D", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Tu damy tytu�:D", nullptr, nullptr);
     if (!window) {
         cerr << "Nie udało się utworzyć okna GLFW\n";
         glfwTerminate();
@@ -120,8 +119,18 @@ int main()
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
-    // Ustaw rozmiar punktu
-    glPointSize(10.0f);
+    // VAO i VBO dla toru cząstki
+    GLuint trajectoryVAO, trajectoryVBO;
+    glGenVertexArrays(1, &trajectoryVAO);
+    glGenBuffers(1, &trajectoryVBO);
+
+    glBindVertexArray(trajectoryVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, trajectoryVBO);
+    // Miejsce na 10000 punktów po 2 floaty (x, y) (można potem powiększyć)
+    glBufferData(GL_ARRAY_BUFFER, 10000 * 2 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);  
 
 
 
@@ -148,7 +157,8 @@ int main()
 
         ImGui::InputDouble("B[T] - natężenie pola", &Bz);
         ImGui::InputDouble("dt [s]", &dt);
-        ImGui::InputDouble("m[jednoskta] - masa cząstki", &masa);
+        ImGui::InputDouble("m[jednoskta] - masa cząstki", &particle.mass);
+        ImGui::InputDouble("q[jednoskta] - ładunek cząstki", &particle.charge);
 
         if (ImGui::Button("Start")) simulate = true;
         ImGui::SameLine();
@@ -156,10 +166,34 @@ int main()
         ImGui::SameLine();
         if (ImGui::Button("Reset")) {
             particle.Reset({ 0.0, 0.0 }, { 1.0, 0.0 });
+            // Czyszczenie VBO trajektorii lotu
+            glBindBuffer(GL_ARRAY_BUFFER, trajectoryVBO);
+            std::vector<float> empty;
+            glBufferSubData(GL_ARRAY_BUFFER, 0, 0, empty.data());
         }
+
         ImGui::End();
+		//Rysowanie trajektorii co 10 kroków (dla lepszej wydajności)
+        static int stepCounter = 0;
         if (simulate) {
-            particle.UpdateRK4(dt, Bz, masa);
+			particle.UpdateRK4(dt, Bz); // Aktualizacja pozycji cząstki
+            stepCounter++;
+
+            if (particle.trajectory.size() > 10000)
+                particle.trajectory.erase(particle.trajectory.begin());
+
+            // Co 10 kroków aktualizujemy bufor trajektorii
+            if (stepCounter % 10 == 0) {
+                std::vector<float> points;
+                points.reserve(particle.trajectory.size() * 2);
+                for (auto& p : particle.trajectory) {
+                    points.push_back((float)p.x);
+                    points.push_back((float)p.y);
+                }
+
+                glBindBuffer(GL_ARRAY_BUFFER, trajectoryVBO);
+                glBufferSubData(GL_ARRAY_BUFFER, 0, points.size() * sizeof(float), points.data());
+            }
         }
 
         ImGui::Render();
@@ -174,12 +208,20 @@ int main()
         glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
 
-        // Rysuj cząstkę
+		// Rysuj cząstkę (point size 10f)
+        glPointSize(10.0f);
         glUseProgram(shaderProgram);
         glBindVertexArray(particleVAO);
         glDrawArrays(GL_POINTS, 0, 1);
         glBindVertexArray(0);
         glUseProgram(0);
+
+        // Rysowanie toru cząstki (point size 1f)
+        glPointSize(1.0f);
+        glUseProgram(shaderProgram);
+        glBindVertexArray(trajectoryVAO);
+		glDrawArrays(GL_POINTS, 0, (GLsizei)particle.trajectory.size()); // Rysuj linię łączącą punkty toru
+        glBindVertexArray(0);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

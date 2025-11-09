@@ -49,6 +49,14 @@ cmake_ninja_workdir = C$:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyc
 
 build cmake_object_order_depends_target_OpenGLApp: phony || cmake_object_order_depends_target_glad cmake_object_order_depends_target_glfw
 
+build CMakeFiles\OpenGLApp.dir\src\Particle.cpp.obj: CXX_COMPILER__OpenGLApp_unscanned_Debug C$:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\src\Particle.cpp || cmake_object_order_depends_target_OpenGLApp
+  FLAGS = /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd
+  INCLUDES = -IC:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\external\glm -IC:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\external\imgui -IC:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\external\imgui\backends -IC:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\include -IC:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\external\glfw\include -IC:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\external\glad\include
+  OBJECT_DIR = CMakeFiles\OpenGLApp.dir
+  OBJECT_FILE_DIR = CMakeFiles\OpenGLApp.dir\src
+  TARGET_COMPILE_PDB = CMakeFiles\OpenGLApp.dir\
+  TARGET_PDB = OpenGLApp.pdb
+
 build CMakeFiles\OpenGLApp.dir\src\main.cpp.obj: CXX_COMPILER__OpenGLApp_unscanned_Debug C$:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\src\main.cpp || cmake_object_order_depends_target_OpenGLApp
   FLAGS = /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd
   INCLUDES = -IC:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\external\glm -IC:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\external\imgui -IC:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\external\imgui\backends -IC:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\include -IC:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\external\glfw\include -IC:\Users\Nikodem\Documents\GitHub\symulacja_pole_magnetyczne\external\glad\include
@@ -113,7 +121,7 @@ build CMakeFiles\OpenGLApp.dir\external\imgui\backends\imgui_impl_opengl3.cpp.ob
 #############################################
 # Link the executable OpenGLApp.exe
 
-build OpenGLApp.exe: CXX_EXECUTABLE_LINKER__OpenGLApp_Debug CMakeFiles\OpenGLApp.dir\src\main.cpp.obj CMakeFiles\OpenGLApp.dir\external\imgui\imgui.cpp.obj CMakeFiles\OpenGLApp.dir\external\imgui\imgui_draw.cpp.obj CMakeFiles\OpenGLApp.dir\external\imgui\imgui_tables.cpp.obj CMakeFiles\OpenGLApp.dir\external\imgui\imgui_widgets.cpp.obj CMakeFiles\OpenGLApp.dir\external\imgui\backends\imgui_impl_glfw.cpp.obj CMakeFiles\OpenGLApp.dir\external\imgui\backends\imgui_impl_opengl3.cpp.obj | external\glfw\src\glfw3.lib glad.lib || external\glfw\src\glfw3.lib glad.lib
+build OpenGLApp.exe: CXX_EXECUTABLE_LINKER__OpenGLApp_Debug CMakeFiles\OpenGLApp.dir\src\Particle.cpp.obj CMakeFiles\OpenGLApp.dir\src\main.cpp.obj CMakeFiles\OpenGLApp.dir\external\imgui\imgui.cpp.obj CMakeFiles\OpenGLApp.dir\external\imgui\imgui_draw.cpp.obj CMakeFiles\OpenGLApp.dir\external\imgui\imgui_tables.cpp.obj CMakeFiles\OpenGLApp.dir\external\imgui\imgui_widgets.cpp.obj CMakeFiles\OpenGLApp.dir\external\imgui\backends\imgui_impl_glfw.cpp.obj CMakeFiles\OpenGLApp.dir\external\imgui\backends\imgui_impl_opengl3.cpp.obj | external\glfw\src\glfw3.lib glad.lib || external\glfw\src\glfw3.lib glad.lib
   FLAGS = /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = external\glfw\src\glfw3.lib  glad.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib

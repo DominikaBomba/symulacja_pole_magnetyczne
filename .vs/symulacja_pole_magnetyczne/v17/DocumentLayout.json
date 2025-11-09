@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\src\\Particle.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Particle.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\src\\Particle.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Particle.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
@@ -39,19 +47,45 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "Particle.cpp",
+              "DocumentMoniker": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\src\\Particle.cpp",
+              "RelativeDocumentMoniker": "src\\Particle.cpp",
+              "ToolTip": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\src\\Particle.cpp",
+              "RelativeToolTip": "src\\Particle.cpp",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABQAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-11-09T16:43:48.688Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Particle.h",
+              "DocumentMoniker": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\src\\Particle.h",
+              "RelativeDocumentMoniker": "src\\Particle.h",
+              "ToolTip": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\src\\Particle.h",
+              "RelativeToolTip": "src\\Particle.h",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABYAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-11-09T16:07:01.277Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "main.cpp",
               "DocumentMoniker": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\src\\main.cpp",
               "RelativeDocumentMoniker": "src\\main.cpp",
               "ToolTip": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\src\\main.cpp",
               "RelativeToolTip": "src\\main.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAAAD8AAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-10-29T20:55:06.569Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "CMakePresets.json",
               "DocumentMoniker": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\CMakePresets.json",
               "RelativeDocumentMoniker": "CMakePresets.json",
@@ -64,7 +98,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "CMakeLists.txt",
               "DocumentMoniker": "C:\\Users\\Nikodem\\Documents\\GitHub\\symulacja_pole_magnetyczne\\elektron_w_polu\\CMakeLists.txt",
               "RelativeDocumentMoniker": "elektron_w_polu\\CMakeLists.txt",

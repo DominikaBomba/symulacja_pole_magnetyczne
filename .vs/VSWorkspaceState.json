@@ -13,9 +13,8 @@
   },
   "ExpandedNodes": [
     "",
-    "\\external",
-    "\\external\\imgui\\examples",
-    "\\external\\imgui\\examples\\example_allegro5",
+    "\\external\\glad\\example\\c++",
+    "\\external\\glm",
     "\\src"
   ],
   "SelectedNode": "\\src\\main.cpp",

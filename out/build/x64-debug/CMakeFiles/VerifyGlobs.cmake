@@ -5,6 +5,7 @@ cmake_policy(SET CMP0009 NEW)
 # SOURCES at CMakeLists.txt:8 (file)
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "C:/Users/Nikodem/Documents/GitHub/symulacja_pole_magnetyczne/src/*.cpp")
 set(OLD_GLOB
+  "C:/Users/Nikodem/Documents/GitHub/symulacja_pole_magnetyczne/src/Particle.cpp"
   "C:/Users/Nikodem/Documents/GitHub/symulacja_pole_magnetyczne/src/main.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
