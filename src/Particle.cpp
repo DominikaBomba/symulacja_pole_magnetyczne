@@ -1,28 +1,28 @@
-#include "Particle.h"
+ï»¿#include "Particle.h"
 
 Particle::Particle(
-	const glm::dvec2& pos,
-	const glm::dvec2& vel,
-	double q,
-	double m)
-	: position(pos), velocity(vel), charge(q), mass(m)
+    const glm::dvec2 & pos,
+    const glm::dvec2 & vel,
+    float q,
+    float m)
+    : position(pos), velocity(vel), charge(q), mass(m)
 {
     trajectory.reserve(1024);
-	trajectory.push_back(position);
+    trajectory.push_back(position);
 }
 
-glm::dvec2 Particle::LorentzForce(double Bz) const {
-	double Fx = charge * velocity.y * Bz;
-	double Fy = -charge * velocity.x * Bz;
-	return glm::dvec2(Fx, Fy);
+glm::dvec2 Particle::LorentzForce(float Bz) const {
+    float Fx = charge * velocity.y * Bz;
+    float Fy = -charge * velocity.x * Bz;
+    return glm::dvec2(Fx, Fy);
 }
 
-glm::dvec4 Particle::Derivatives(double Bz) const {
-	glm::dvec2 F = LorentzForce(Bz);
-	return glm::dvec4(velocity.x, velocity.y, F.x / mass, F.y / mass);
+glm::dvec4 Particle::Derivatives(float Bz) const {
+    glm::dvec2 F = LorentzForce(Bz);
+    return glm::dvec4(velocity.x, velocity.y, F.x / mass, F.y / mass);
 }
 
-void Particle::UpdateRK4(double dt, double Bz) {
+void Particle::UpdateRK4(float dt, float Bz) {
     auto f = [&](const glm::dvec4& s) -> glm::dvec4 {
         glm::dvec2 v(s.z, s.w);
         glm::dvec2 F(charge * v.y * Bz, -charge * v.x * Bz);
@@ -56,9 +56,15 @@ void Particle::Reset(const glm::dvec2& pos, const glm::dvec2& vel) {
     position = pos;
     velocity = vel;
     trajectory.clear();
-	//kilka wstêpnych punktów w trajektorii ¿eby po resecie nie by³o anomalii 
+    //kilka wstï¿½pnych punktï¿½w w trajektorii ï¿½eby po resecie nie byï¿½o anomalii 
     for (int i = 0; i < 10; ++i) {
         trajectory.push_back(position);
     }
 }
-
+void Particle::SetSpeed(double newSpeed) {
+    double currentSpeed = glm::length(velocity);
+    if (currentSpeed > 0.0)
+        velocity = glm::normalize(velocity) * newSpeed;
+    else
+        velocity = glm::dvec2(newSpeed, 0.0); // jeÅ›li prÄ™dkoÅ›Ä‡ byÅ‚a 0, nadaj w osi X
+}
