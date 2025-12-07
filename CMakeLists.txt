@@ -5,17 +5,17 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Główne źródła
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.h)
 
 # Dodanie executabla (bez nagłówków)
-add_executable(${PROJECT_NAME} ${SOURCES} "src/stb_image.h")
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 # GLFW
 add_subdirectory(external/glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 
 # GLAD
-add_library(glad STATIC external/glad/src/glad.c "src/stb_image.h")
+add_library(glad STATIC external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
 target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 
@@ -38,4 +38,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 # Inne katalogi include (opcjonalne)
-target_include_directories(${PROJECT_NAME} PRIVATE include external/glfw/include external/glad/include)
+target_include_directories(${PROJECT_NAME} PRIVATE include external/glfw/include external/glad/include src)
