@@ -18,12 +18,11 @@
 #include "Shader.h"
 #include "FieldRenderer.h"
 #include "AxesRenderer.h"
+#include "ParticleRenderer.h"
+#include "GuiController.h"
 
 using namespace std;
 
-enum AppState {
-    MENU, SIMULATION, GAME
-};
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -64,198 +63,32 @@ int main()
     // Osie (klasa AxesRenderer)
     AxesRenderer axesRenderer;
 
-    // przestrzeń symuacji - macierz służy do transformacji współrzędnych aby nie były zniekształcone
-    // Shader cząstki (używamy klasy Shader zamiast ręcznego CompileShader)
-    const char* vertexSource = R"(
-        #version 330 core
-        layout (location = 0) in vec2 aPos;
-        
-        uniform mat4 projection;
+	// Cząstka (klasa ParticleRenderer)
+    ParticleRenderer particleRenderer;
 
-        void main() { gl_Position = projection * vec4(aPos, 0.0, 1.0); }
-    )";
-
-    const char* fragmentSource = R"(
-        #version 330 core
-        out vec4 FragColor;
-        void main() { FragColor = vec4(0.3, 0.3, 0.9, 1.0); }
-    )";
-
-    // Tworzymy obiekt shadera dla cząstki
-    Shader particleShader(vertexSource, fragmentSource);
-
-    // --- BUFORY DLA CZĄSTKI (Bez zmian logicznych) ---
-    GLuint particleVAO, particleVBO;
-    glGenVertexArrays(1, &particleVAO);
-    glGenBuffers(1, &particleVBO);
-
-    glBindVertexArray(particleVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-
-    GLuint trajectoryVAO, trajectoryVBO;
-    glGenVertexArrays(1, &trajectoryVAO);
-    glGenBuffers(1, &trajectoryVBO);
-
-    glBindVertexArray(trajectoryVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, trajectoryVBO);
-    glBufferData(GL_ARRAY_BUFFER, 10000 * 2 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-
+    GuiController gui;      // <--- Tworzymy kontroler
+    gui.Init(window);       // <--- Inicjalizujemy ImGui
 
     Particle particle({ 0.0, 0.0 }, { 1.0, 0.0 }, 1.0, 0.1);
     float Bz = -1.0f;
     float dt = 0.00025f;
     bool simulate = false;
 
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 330");
+	float worldHeight = 8.0f; // Wysokość świata w metrach (do zoomu)
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        // Nowa klatka ImGui
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        if (appstate == AppState::MENU) {
-            ImGui::Begin("MENU");
-            ImGui::Text("Wybierz Tryb");
-
-            if (ImGui::Button("GRA")) {
-                appstate = AppState::GAME;
-            }
-            if (ImGui::Button("SYMULACJA")) {
-                appstate = AppState::SIMULATION;
-            } ImGui::End();
-        }
-
-        if (appstate == AppState::SIMULATION) {
-
-            ImGui::Begin("Sterowanie symulacją");
-            ImGui::Text("Parametry cząstki");
-
-            ImGui::Separator();
-            ImGui::Text("Natężenie pola (Bz)");
-
-            ImGui::SliderFloat("B [T]", &Bz, -2.0f, 2.0f);
-
-            ImGui::Separator();
-            ImGui::Text("Masa (m)");
-            ImGui::SliderFloat("m [x10^-25 kg]", &particle.mass, 0.1f, 10.0f, "%.1f");
-
-
-            ImGui::Separator();
-            ImGui::Text("Ładunek cząstki (q)");
-            ImGui::SliderFloat("x10^-16 [C]", &particle.charge, 1.0f, 10.0f, "%.1f");
-
-
-            ImGui::Separator();
-            ImGui::Text("Prędkość początkowa");
-            static float v = 1.0f;
-            if (ImGui::SliderFloat("v [x10^6 m/s]", &v, 0.1f, 5.0f, "%.1f")) {
-                particle.SetSpeed(v);
-            }
-
-            ImGui::Separator();
-
-            ImGui::Text("Krok czasowy (dt)");
-            ImGui::SliderFloat("dt", &dt, 0.00001f, 0.005f);
-
-
-            ImGui::Separator();
-            if (ImGui::Button("Start")) simulate = true;
-
-            ImGui::SameLine();
-            if (ImGui::Button("Stop")) simulate = false;
-            ImGui::SameLine();
-
-            ImGui::Separator();
-
-            //spr że nie dzieli przez 0 - denomi to mianownik we wzorze na promien
-            float denomi = std::abs(Bz) * std::abs(particle.charge);
-
-            if (denomi > 0.000001f) { // Sprawdzenie, czy mianownik jest bliski zero
-                float promien = (particle.mass * v) / denomi;
-
-                ImGui::Text("Promień (R): %f mm", promien);
-            }
-            else {
-
-                ImGui::Text("Promień (R): Nieskończony (Linia prosta)");
-            }
-
-            if (ImGui::Button("Reset")) {
-                particle.Reset({ 0.0, 0.0 }, { 1.0, 0.0 });
-                glBindBuffer(GL_ARRAY_BUFFER, trajectoryVBO);
-                std::vector<float> empty;
-                glBufferSubData(GL_ARRAY_BUFFER, 0, 0, empty.data());
-            }
-
-            ImGui::End();
-        }
-
-
-        if (appstate == AppState::GAME) {
-            ImGui::Begin("Tryb gry");
-
-            ImGui::Text("Wybierz Parametry by trafić do celu");
-
-
-            ImGui::Separator();
-            ImGui::Text("Natężenie pola (Bz)");
-            ImGui::SliderFloat("B [T]", &Bz, 0.0f, 2.0f);
-
-            ImGui::Separator();
-            ImGui::Text("Masa (m)");
-            ImGui::SliderFloat("m [x10^-25 kg]", &particle.mass, 0.1f, 10.0f);
-
-
-            ImGui::Separator();
-            ImGui::Text("Ładunek cząstki (q)");
-            ImGui::SliderFloat("x10^-16 [C]", &particle.charge, 1.0f, 10.0f);
-
-
-            ImGui::Separator();
-            ImGui::Text("Prędkość początkowa");
-            static float v = 1.0f;
-            if (ImGui::SliderFloat("v [x10^6 m/s]", &v, 0.1f, 5.0f)) {
-                particle.SetSpeed(v);
-            }
-            ImGui::End();
-        }
-
         // ----------------------------------------------------------
         // Aktualizacja cząstki
         // ----------------------------------------------------------
-        static int stepCounter = 0;
-        if (simulate) {
+        if (simulate && appstate != AppState::MENU) {
             particle.UpdateRK4(dt, Bz);
-            stepCounter++;
 
-            if (particle.trajectory.size() > 10000)
+            if (particle.trajectory.size() > Particle::MAX_TRAJECTORY_SIZE)
                 particle.trajectory.erase(particle.trajectory.begin());
 
-            if (stepCounter % 10 == 0) {
-                std::vector<float> points;
-                points.reserve(particle.trajectory.size() * 2);
-                for (auto& p : particle.trajectory) {
-                    points.push_back((float)p.x);
-                    points.push_back((float)p.y);
-                }
-
-                glBindBuffer(GL_ARRAY_BUFFER, trajectoryVBO);
-                glBufferSubData(GL_ARRAY_BUFFER, 0, points.size() * sizeof(float), points.data());
-            }
+            particleRenderer.UpdateTrajectory(particle.trajectory);
         }
 
         // ----------------------------------------------------------
@@ -281,8 +114,6 @@ int main()
         // proporcje ekranu
         float aspectRatio = (float)currentW / (float)currentH;
 
-        // skala świata
-        float worldHeight = 4.0f; //skala świata (przestrzeni) (wysokość stała)
         float worldWidth = worldHeight * aspectRatio; //szerokość dostosowana do proporcji ekranu
 
         // macierz projekcji ortogonalnej (2D)
@@ -295,51 +126,28 @@ int main()
         if (appstate == AppState::SIMULATION || appstate == AppState::GAME) {
             fieldRenderer.Draw(Bz, aspectRatio);
 			axesRenderer.Draw(projection);
+            particleRenderer.Draw(particle, projection);
         }
 
-        // 2. RYSOWANIE CZASTKI I TORU
-        // najpierw rysowanie tła
-        particleShader.Use(); // Używamy metody klasy Shader
 
-        // wysyłamy macierz do shadera
-        // Szukamy zmiennej "projection" programie shaderowym
-        // Używamy metody klasy Shader
-        particleShader.SetMat4("projection", projection);
+        // 3. Rysowanie GUI i obsługa RESETU
+        bool shouldReset = gui.Render(appstate, simulate, Bz, dt, particle, worldHeight, 0);
+        // Przekazujemy 0 jako ostatni parametr, bo GUI już nie czyści bufora bezpośrednio.
+        if (shouldReset) {
+            // 1. Fizyka: Czyścimy wektor trajektorii w pamięci RAM
+            particle.trajectory.clear();
 
-        // Rysowanie cząstki
-        float pos[2] = { (float)particle.position.x, (float)particle.position.y };
-        glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
-        glPointSize(10.0f);
-        glBindVertexArray(particleVAO);
-        glDrawArrays(GL_POINTS, 0, 1);
+            // Dodajemy punkt startowy (0,0), żeby wektor nie był pusty
+            particle.trajectory.push_back(particle.position);
 
-        // Rysowanie toru
-        glPointSize(2.0f);
-        glBindVertexArray(trajectoryVAO);
-        glDrawArrays(GL_POINTS, 0, (GLsizei)particle.trajectory.size());
+            // 2. Grafika: "Sierocimy" stary bufor (wyrzucamy śmieci z pamięci karty)
+            particleRenderer.ClearTrajectory();
 
-        glBindVertexArray(0);
-        glUseProgram(0);
-
-        // ImGui rendering
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            // 3. Aktualizujemy GPU tym jednym, czystym punktem startowym
+            particleRenderer.UpdateTrajectory(particle.trajectory);
+        }
 
         glfwSwapBuffers(window);
     }
-
-    glDeleteVertexArrays(1, &particleVAO);
-    glDeleteVertexArrays(1, &trajectoryVAO);
-    glDeleteBuffers(1, &particleVBO);
-    glDeleteBuffers(1, &trajectoryVBO);
-    // Bufory tła są teraz usuwane w destruktorze klasy FieldRenderer
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-    glfwDestroyWindow(window);
-    glfwTerminate();
-
     return 0;
 }

@@ -7,7 +7,7 @@ Particle::Particle(
     float m)
     : position(pos), velocity(vel), charge(q), mass(m)
 {
-    trajectory.reserve(1024);
+    trajectory.reserve(MAX_TRAJECTORY_SIZE);
     trajectory.push_back(position);
 }
 
@@ -56,10 +56,8 @@ void Particle::Reset(const glm::dvec2& pos, const glm::dvec2& vel) {
     position = pos;
     velocity = vel;
     trajectory.clear();
-    //kilka wst�pnych punkt�w w trajektorii �eby po resecie nie by�o anomalii 
-    for (int i = 0; i < 10; ++i) {
-        trajectory.push_back(position);
-    }
+
+    trajectory.push_back(position);
 }
 void Particle::SetSpeed(double newSpeed) {
     double currentSpeed = glm::length(velocity);

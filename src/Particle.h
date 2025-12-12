@@ -4,6 +4,7 @@
 
 class Particle {
 public:
+    static const int MAX_TRAJECTORY_SIZE = 10000;
     glm::dvec2 position;   // [m]
     glm::dvec2 velocity;   // [m/s]
     float charge;         // [C]
