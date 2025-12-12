@@ -23,7 +23,7 @@ void GuiController::Shutdown() {
 }
 
 bool GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float& dt,
-    Particle& particle, float& worldHeight, GLuint trajectoryVBO) {
+    Particle& particle, float& worldHeight, Target& target) {
 	bool resetRequested = false;
 
     // Nowa klatka ImGui (kod startowy z maina)
@@ -111,7 +111,10 @@ bool GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
             // Logika wizualna - zg³aszamy ¿¹danie
             resetRequested = true;
         }
-
+        // Przycisk powrotu, ¿eby nie utkn¹æ w grze
+        if (ImGui::Button("Wróæ do Menu")) {
+            appstate = AppState::MENU;
+        }
         ImGui::End();
     }
 
@@ -120,29 +123,71 @@ bool GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
         ImGui::Begin("Tryb gry");
 
         ImGui::Text("Wybierz Parametry by trafiæ do celu");
+       
+        if (target.isHit) {
+            simulate = false; // Zatrzymujemy symulacjê po trafieniu
+            ImGui::Separator();
+            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "BRAWO! Cel Trafiony!");
+            ImGui::Separator();
+        } 
+        ImGui::Separator();
+        ImGui::Text("Widok (Kamera)");
 
-        // --- NOWOŒÆ: TE¯ DODAJEMY ZOOM W GRZE ---
-        ImGui::SliderFloat("Zoom", &worldHeight, 1.0f, 20.0f);
+        ImGui::SliderFloat("Skala (Zoom) [m]", &worldHeight, 1.0f, 20.0f, "%.1f");
 
         ImGui::Separator();
         ImGui::Text("Natê¿enie pola (Bz)");
-        ImGui::SliderFloat("B [T]", &Bz, 0.0f, 2.0f);
+
+        ImGui::SliderFloat("B [T]", &Bz, -2.0f, 2.0f);
 
         ImGui::Separator();
+
         ImGui::Text("Masa (m)");
-        ImGui::SliderFloat("m [x10^-25 kg]", &particle.mass, 0.1f, 10.0f);
+        ImGui::SliderFloat("m [x10^-25 kg]", &particle.mass, 0.1f, 10.0f, "%.1f");
 
 
         ImGui::Separator();
         ImGui::Text("£adunek cz¹stki (q)");
-        ImGui::SliderFloat("x10^-16 [C]", &particle.charge, 1.0f, 10.0f);
+        ImGui::SliderFloat("x10^-16 [C]", &particle.charge, 1.0f, 10.0f, "%.1f");
 
 
         ImGui::Separator();
         ImGui::Text("Prêdkoœæ pocz¹tkowa");
         static float v = 1.0f;
-        if (ImGui::SliderFloat("v [x10^6 m/s]", &v, 0.1f, 5.0f)) {
+        if (ImGui::SliderFloat("v [x10^6 m/s]", &v, 0.1f, 5.0f, "%.1f")) {
             particle.SetSpeed(v);
+        }
+
+        ImGui::Separator();
+
+       
+
+        ImGui::Separator();
+        if (ImGui::Button("PLAY")) simulate = true;
+        ImGui::SameLine();
+        if (ImGui::Button("STOP")) simulate = false;
+        ImGui::Separator();
+
+        //spr ¿e nie dzieli przez 0 - denomi to mianownik we wzorze na promien
+        float denomi = std::abs(Bz) * std::abs(particle.charge);
+
+        if (denomi > 0.000001f) { // Sprawdzenie, czy mianownik jest bliski zero
+            float promien = (particle.mass * v) / denomi;
+
+            ImGui::Text("Promieñ (R): %f mm", promien);
+        }
+        else {
+
+            ImGui::Text("Promieñ (R): Nieskoñczony (Linia prosta)");
+        }
+
+        if (ImGui::Button("Reset")) {
+            // Logika C++
+            simulate = false;
+            particle.Reset({ 0.0, 0.0 }, { 1.0, 0.0 });
+            target.Reset();
+            // Logika wizualna - zg³aszamy ¿¹danie
+            resetRequested = true;
         }
 
         // Przycisk powrotu, ¿eby nie utkn¹æ w grze

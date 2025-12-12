@@ -6,13 +6,14 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "Particle.h"
 #include <glm/glm.hpp>
-// glm::ortho - transformacje przestrzeni aby nie zniekształcać obrazu
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
 #include <cmath>
 #include <random> 
+#include "TargetRenderer.h"
+#include "Target.h"
 
 // Nagłówki
 #include "Shader.h"
@@ -31,6 +32,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 int main()
 {
+
     if (!glfwInit()) {
         cerr << "Inicjacja GLFW się nie udała\n";
         return -1;
@@ -56,7 +58,8 @@ int main()
     }
 
     // --- INICJALIZACJA ZASOBÓW (REFRACTOR) ---
-
+    Target target(0.3f); // Cel o promieniu 0.5 metra
+    TargetRenderer targetRenderer;
     // Tło (klasa FieldRenderer)
     FieldRenderer fieldRenderer;
 
@@ -71,9 +74,13 @@ int main()
 
     Particle particle({ 0.0, 0.0 }, { 1.0, 0.0 }, 1.0, 0.1);
     float Bz = -1.0f;
-    float dt = 0.00025f;
+    float dt = 0.0015f;
     bool simulate = false;
+    
+    glEnable(GL_PROGRAM_POINT_SIZE); 
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	float worldHeight = 8.0f; // Wysokość świata w metrach (do zoomu)
 
     while (!glfwWindowShouldClose(window)) {
@@ -89,6 +96,14 @@ int main()
                 particle.trajectory.erase(particle.trajectory.begin());
 
             particleRenderer.UpdateTrajectory(particle.trajectory);
+
+            if (appstate == AppState::GAME && !target.isHit) { // <-- 1. Upewnij się, że ten warunek jest spełniony
+                if (target.CheckCollision(particle)) {          // <-- 2. Wywołanie CheckCollision
+                    target.isHit = true;                        // <-- 3. Ustawienie flagi hit
+                    simulate = false;                           // <-- 4. Zatrzymanie symulacji
+                    std::cout << "TRAFIONY! W " << particle.position.x << ", " << particle.position.y << std::endl;
+                }
+            }
         }
 
         // ----------------------------------------------------------
@@ -126,12 +141,15 @@ int main()
         if (appstate == AppState::SIMULATION || appstate == AppState::GAME) {
             fieldRenderer.Draw(Bz, aspectRatio);
 			axesRenderer.Draw(projection);
+            if (appstate == AppState::GAME) {
+                targetRenderer.Draw(target, projection, worldHeight); // <-- WYWOŁANIE
+            }
             particleRenderer.Draw(particle, projection);
         }
 
 
         // 3. Rysowanie GUI i obsługa RESETU
-        bool shouldReset = gui.Render(appstate, simulate, Bz, dt, particle, worldHeight, 0);
+        bool shouldReset = gui.Render(appstate, simulate, Bz, dt, particle, worldHeight, target );
         // Przekazujemy 0 jako ostatni parametr, bo GUI już nie czyści bufora bezpośrednio.
         if (shouldReset) {
             // 1. Fizyka: Czyścimy wektor trajektorii w pamięci RAM
@@ -145,6 +163,10 @@ int main()
 
             // 3. Aktualizujemy GPU tym jednym, czystym punktem startowym
             particleRenderer.UpdateTrajectory(particle.trajectory);
+
+            if (appstate == AppState::GAME) {
+                target.GenerateNewTarget(worldHeight, aspectRatio); // (Zakładając, że 'aspectRatio' jest dostępne)
+            }
         }
 
         glfwSwapBuffers(window);

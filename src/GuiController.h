@@ -1,6 +1,8 @@
 #pragma once
 #include <glad/glad.h> // Potrzebne dla GLuint (trajectoryVBO)
 #include <GLFW/glfw3.h>
+
+#include "Target.h" 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -25,5 +27,5 @@ public:
     // Przyjmujemy referencje do zmiennych, które GUI mo¿e modyfikowaæ.
     // trajectoryVBO przekazujemy po to, aby przycisk Reset móg³ wyczyœciæ bufor graficzny.
     bool Render(AppState& appstate, bool& simulate, float& Bz, float& dt,
-        Particle& particle, float& worldHeight, GLuint trajectoryVBO);
+        Particle& particle, float& worldHeight, Target& target);
 };
