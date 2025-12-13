@@ -38,14 +38,14 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
 
     if (appstate == AppState::MENU) {
         ImGui::Begin("MENU");
-        ImGui::Text("Wybierz Tryb");
+        ImGui::Text("Select app mode");
 
-        if (ImGui::Button("GRA")) {
+        if (ImGui::Button("GAME")) {
             appstate = AppState::GAME;
             simulate = false;      // Zatrzymujemy symulacjê przy wejœciu
             retryRequested = true; // Wymuszamy reset (czyszczenie œladu)
         }
-        if (ImGui::Button("SYMULACJA")) {
+        if (ImGui::Button("SIMULATION")) {
             appstate = AppState::SIMULATION;
             simulate = false;      // Zatrzymujemy symulacjê przy wejœciu
             retryRequested = true; // Wymuszamy reset
@@ -54,43 +54,46 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
 
     if (appstate == AppState::SIMULATION) {
 
-        ImGui::Begin("Sterowanie symulacj¹");
-        ImGui::Text("Parametry cz¹stki");
+        ImGui::Begin("Simulation control");
+        ImGui::Text("Physics parameters");
 
-        // --- NOWOŒÆ: STEROWANIE SKAL¥ (ZOOM) ---
-        ImGui::Separator();
-        ImGui::Text("Widok (Kamera)");
-        // Domyœlnie 8.0. Mniejsze wartoœci = przybli¿enie.
-        ImGui::SliderFloat("Skala (Zoom) [m]", &worldHeight, 1.0f, 20.0f, "%.1f");
+        
 
         ImGui::Separator();
-        ImGui::Text("Natê¿enie pola (Bz)");
+        ImGui::Text("Magnetic field (B)");
 
-        ImGui::SliderFloat("B [T]", &Bz, -2.0f, 2.0f);
+        ImGui::SliderFloat("[T]", &Bz, -2.0f, 2.0f);
 
         ImGui::Separator();
-        ImGui::Text("Masa (m)");
-        ImGui::SliderFloat("m [x10^-25 kg]", &particle.mass, 0.1f, 10.0f, "%.1f");
+        ImGui::Text("Mass (m)");
+        ImGui::SliderFloat("[x10^-25 kg]", &particle.mass, 0.1f, 10.0f, "%.1f");
 
 
         ImGui::Separator();
-        ImGui::Text("£adunek cz¹stki (q)");
-        ImGui::SliderFloat("x10^-16 [C]", &particle.charge, 1.0f, 10.0f, "%.1f");
+        ImGui::Text("Particle charge (q)");
+        ImGui::SliderFloat("[x10^-16 C]", &particle.charge, 1.0f, 10.0f, "%.1f");
 
 
         ImGui::Separator();
-        ImGui::Text("Prêdkoœæ pocz¹tkowa");
+        ImGui::Text("Initial velocity (v)");
         static float v = 1.0f;
-        if (ImGui::SliderFloat("v [x10^6 m/s]", &v, 0.1f, 5.0f, "%.1f")) {
+        if (ImGui::SliderFloat("[x10^6 m/s]", &v, 0.1f, 5.0f, "%.1f")) {
             particle.SetSpeed(v);
         }
 
+        // ---STEROWANIE SKAL¥ (ZOOM) ---
+        ImGui::Separator();
+		ImGui::Text("Simulation properties");
+        ImGui::Separator();
+        ImGui::Text("Zoom");
+        // Domyœlnie 8.0. Mniejsze wartoœci = przybli¿enie.
+        ImGui::SliderFloat("[mm]", &worldHeight, 1.0f, 20.0f, "%.1f");
+
         ImGui::Separator();
 
-        ImGui::Text("Krok czasowy (dt)");
-        ImGui::SliderFloat("dt", &dt, 0.00001f, 0.005f, "%.5f");
-
-
+        ImGui::Text("Time step (dt)");
+        ImGui::SliderFloat("[dt]", &dt, 0.00001f, 0.005f, "%.5f");
+        
         ImGui::Separator();
         if (ImGui::Button("Start")) simulate = true;
 
@@ -104,13 +107,11 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
         float denomi = std::abs(Bz) * std::abs(particle.charge);
 
         if (denomi > 0.000001f) { // Sprawdzenie, czy mianownik jest bliski zero
-            float promien = (particle.mass * v) / denomi;
-
-            ImGui::Text("Promieñ (R): %f mm", promien);
+            float radius = (particle.mass * v) / denomi;
+            ImGui::Text("Radius (r) %f [mm]", radius);
         }
         else {
-
-            ImGui::Text("Promieñ (R): Nieskoñczony (Linia prosta)");
+            ImGui::Text("Radius (r): infinite");
         }
 
         if (ImGui::Button("Reset")) {
@@ -121,7 +122,7 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
             retryRequested = true;
         }
         // Przycisk powrotu, ¿eby nie utkn¹æ w grze
-        if (ImGui::Button("Wróæ do Menu")) {
+        if (ImGui::Button("Back to Menu")) {
             appstate = AppState::MENU;
             simulate = false; // Zatrzymujemy przy wyjœciu
         }
@@ -130,15 +131,14 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
 
 
     if (appstate == AppState::GAME) {
-        ImGui::Begin("Tryb gry");
+        ImGui::Begin("Game mode");
 
-        ImGui::Text("Wybierz Parametry by trafiæ do celu");
-        ImGui::Text("(Pole dzia³a tylko po prawej stronie!)");
-
+        ImGui::Text("Adjust parameters to hit the target!");
+        ImGui::Separator();
         if (target.isHit) {
             // simulate = false; // To obs³ugujemy teraz w main
             ImGui::Separator();
-            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "BRAWO! Cel Trafiony!");
+            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Target hit!");
             ImGui::Separator();
         }
 
@@ -146,44 +146,50 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
         bool inputLocked = simulate || target.isHit;
 
         if (inputLocked) {
-            ImGui::TextDisabled("Symulacja w toku - parametry zablokowane");
+            ImGui::TextDisabled("Simulation running...");
         }
         else {
-            ImGui::Separator();
-            ImGui::Text("Widok (Kamera)");
+            ImGui::Text("Physics parameters");
 
-            ImGui::SliderFloat("Skala (Zoom) [m]", &worldHeight, 1.0f, 20.0f, "%.1f");
-
-            ImGui::Separator();
-            ImGui::Text("Natê¿enie pola (Bz)");
-
-            ImGui::SliderFloat("B [T]", &Bz, -2.0f, 2.0f);
-
-            ImGui::Separator();
-
-            ImGui::Text("Masa (m)");
-            ImGui::SliderFloat("m [x10^-25 kg]", &particle.mass, 0.1f, 10.0f, "%.1f");
 
 
             ImGui::Separator();
-            ImGui::Text("£adunek cz¹stki (q)");
-            ImGui::SliderFloat("x10^-16 [C]", &particle.charge, 1.0f, 10.0f, "%.1f");
+            ImGui::Text("Magnetic field (B)");
+
+            ImGui::SliderFloat("[T]", &Bz, -2.0f, 2.0f);
+
+            ImGui::Separator();
+            ImGui::Text("Mass (m)");
+            ImGui::SliderFloat("[x10^-25 kg]", &particle.mass, 0.1f, 10.0f, "%.1f");
 
 
             ImGui::Separator();
-            ImGui::Text("Prêdkoœæ pocz¹tkowa");
+            ImGui::Text("Particle charge (q)");
+            ImGui::SliderFloat("[x10^-16 C]", &particle.charge, 1.0f, 10.0f, "%.1f");
+
+
+            ImGui::Separator();
+            ImGui::Text("Initial velocity (v)");
             static float v = 1.0f;
-            if (ImGui::SliderFloat("v [x10^6 m/s]", &v, 0.1f, 5.0f, "%.1f")) {
+            if (ImGui::SliderFloat("[x10^6 m/s]", &v, 0.1f, 5.0f, "%.1f")) {
                 particle.SetSpeed(v);
             }
 
+            // ---STEROWANIE SKAL¥ (ZOOM) ---
             ImGui::Separator();
-            // DODANO: Wybór kroku czasowego w grze
-            ImGui::Text("Krok czasowy (dt)");
-            ImGui::SliderFloat("dt", &dt, 0.00001f, 0.005f, "%.5f");
+            ImGui::Text("Simulation properties");
+            ImGui::Separator();
+            ImGui::Text("Zoom");
+            // Domyœlnie 8.0. Mniejsze wartoœci = przybli¿enie.
+            ImGui::SliderFloat("[mm]", &worldHeight, 1.0f, 20.0f, "%.1f");
 
             ImGui::Separator();
-            if (ImGui::Button("WYSTRZEL CZASTKE!", ImVec2(-1, 40))) {
+
+            ImGui::Text("Time step (dt)");
+            ImGui::SliderFloat("[dt]", &dt, 0.00001f, 0.005f, "%.5f");
+
+            ImGui::Separator();
+            if (ImGui::Button("FIRE PARTICLE!", ImVec2(-1, 40))) {
                 simulate = true;
             }
         }
@@ -198,30 +204,30 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
             float currentV = glm::length(particle.velocity);
             if (currentV == 0) currentV = 1.0f;
 
-            float promien = (particle.mass * currentV) / denomi;
+            float radius = (particle.mass * currentV) / denomi;
 
-            ImGui::Text("Teoretyczny Promieñ (R): %f mm", promien);
+            ImGui::Text("Radius (r) %f [mm]", radius);
         }
         else {
 
-            ImGui::Text("Promieñ (R): Nieskoñczony (Linia prosta)");
+            ImGui::Text("Radius (r): infinite");
         }
 
         // --- PRZYCISKI STERUJ¥CE ---
         ImGui::Separator();
 
-        if (ImGui::Button("Spróbuj jeszcze raz")) {
+        if (ImGui::Button("Try again")) {
             simulate = false;
             retryRequested = true; // Tylko reset pozycji
         }
 
-        if (ImGui::Button("Nowa Gra (Losuj cel)")) {
+        if (ImGui::Button("New Game")) {
             simulate = false;
             newGameRequested = true; // Reset + nowy cel
         }
 
         // Przycisk powrotu, ¿eby nie utkn¹æ w grze
-        if (ImGui::Button("Wróæ do Menu")) {
+        if (ImGui::Button("Back to Menu")) {
             appstate = AppState::MENU;
             simulate = false; // Zatrzymujemy przy wyjœciu
         }
