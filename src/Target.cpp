@@ -12,28 +12,25 @@ Target::Target(float r) : radius(r), isHit(false) {
 void Target::GenerateNewTarget(float worldHeight, float aspectRatio) {
     // 1. Definicja rozs¹dnego obszaru losowania
     // U¿ywamy worldHeight do dynamicznego skalowania. Cel powinien byæ
-    // w polu widzenia, ale poza punktem startu (0,0).
+	// w polu widzenia (jedynie po prawej stronie ekranu w trybie gry).
 
     float worldWidth = worldHeight * aspectRatio;
 
-    // Ustawiamy maksymalny i minimalny dystans od centrum
-    // Min_dist: aby nie kolidowa³ z cz¹stk¹ w punkcie startowym.
-    float min_dist_from_center = 2.0f; // minimalnie 2.0 metra od (0,0)
-    float max_range = (std::min(worldWidth, worldHeight) / 2.0f) * 0.8f; // Maksymalnie 80% widocznego obszaru
+    float minX = 0.0f;
+    float maxX = (worldWidth / 2.0f);
 
-    if (max_range < min_dist_from_center) {
-        max_range = min_dist_from_center + 1.0f;
-    }
+    // Y: od do³u do góry minus margines
+    float maxY = (worldHeight / 2.0f);
+    float minY = -maxY;
 
-    std::uniform_real_distribution<double> dist_angle(0.0, 2.0 * glm::pi<double>());
-    std::uniform_real_distribution<double> dist_radius(min_dist_from_center, max_range);
+    // Zabezpieczenie gdyby ekran by³ bardzo ma³y
+    if (maxX < minX) maxX = minX;
 
-    // Losowanie w biegunowym uk³adzie wspó³rzêdnych, ¿eby unikn¹æ (0,0)
-    double r = dist_radius(rng);
-    double angle = dist_angle(rng);
+    std::uniform_real_distribution<double> dist_x(minX, maxX);
+    std::uniform_real_distribution<double> dist_y(minY, maxY);
 
-    position.x = r * std::cos(angle);
-    position.y = r * std::sin(angle);
+    position.x = dist_x(rng);
+    position.y = dist_y(rng);
 
     isHit = false;
 

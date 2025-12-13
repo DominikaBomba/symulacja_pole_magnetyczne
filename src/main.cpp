@@ -58,7 +58,7 @@ int main()
     }
 
     // --- INICJALIZACJA ZASOBÓW (REFRACTOR) ---
-    Target target(0.3f); // Cel o promieniu 0.5 metra
+    Target target(0.3f); // Cel o promieniu 0.3 metra
     TargetRenderer targetRenderer;
     // Tło (klasa FieldRenderer)
     FieldRenderer fieldRenderer;
@@ -66,7 +66,7 @@ int main()
     // Osie (klasa AxesRenderer)
     AxesRenderer axesRenderer;
 
-	// Cząstka (klasa ParticleRenderer)
+    // Cząstka (klasa ParticleRenderer)
     ParticleRenderer particleRenderer;
 
     GuiController gui;      // <--- Tworzymy kontroler
@@ -76,21 +76,50 @@ int main()
     float Bz = -1.0f;
     float dt = 0.0015f;
     bool simulate = false;
-    
-    glEnable(GL_PROGRAM_POINT_SIZE); 
+
+    glEnable(GL_PROGRAM_POINT_SIZE);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	float worldHeight = 8.0f; // Wysokość świata w metrach (do zoomu)
+    float worldHeight = 8.0f; // Wysokość świata w metrach (do zoomu)
+
+    // Zmienna do obsługi pierwszego wejścia do gry
+    bool firstGameEntry = true;
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+
+        // Logika inicjalizacji przy pierwszym wejściu do gry
+        if (appstate == AppState::GAME && firstGameEntry) {
+            int w, h;
+            glfwGetFramebufferSize(window, &w, &h);
+            float ratio = (h > 0) ? (float)w / h : 1.0f;
+
+            // Losujemy cel
+            target.GenerateNewTarget(worldHeight, ratio);
+
+            // Resetujemy pozycję na start (lewa strona)
+            float worldWidth = worldHeight * ratio;
+            particle.Reset(glm::dvec2(-worldWidth / 3.0f, 0.0), glm::dvec2(1.0, 0.0));
+            particle.SetSpeed(1.0); // Reset domyślnej prędkości
+
+            firstGameEntry = false;
+        }
 
         // ----------------------------------------------------------
         // Aktualizacja cząstki
         // ----------------------------------------------------------
         if (simulate && appstate != AppState::MENU) {
-            particle.UpdateRK4(dt, Bz);
+
+            // Logika pola magnetycznego w grze (próżnia po lewej)
+            float effectiveB = Bz;
+            if (appstate == AppState::GAME) {
+                if (particle.position.x < 0.0f) {
+                    effectiveB = 0.0f;
+                }
+            }
+
+            particle.UpdateRK4(dt, effectiveB);
 
             if (particle.trajectory.size() > Particle::MAX_TRAJECTORY_SIZE)
                 particle.trajectory.erase(particle.trajectory.begin());
@@ -117,7 +146,7 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-		// obliczanie macierzy projekcji (kamery) aby uniknąć zniekształceń obrazu
+        // obliczanie macierzy projekcji (kamery) aby uniknąć zniekształceń obrazu
 
         // aktualne wymiary okna
         int currentW, currentH;
@@ -139,8 +168,8 @@ int main()
         );
 
         if (appstate == AppState::SIMULATION || appstate == AppState::GAME) {
-            fieldRenderer.Draw(Bz, aspectRatio);
-			axesRenderer.Draw(projection);
+            fieldRenderer.Draw(Bz, aspectRatio, appstate == AppState::GAME);
+            axesRenderer.Draw(projection);
             if (appstate == AppState::GAME) {
                 targetRenderer.Draw(target, projection, worldHeight); // <-- WYWOŁANIE
             }
@@ -149,14 +178,52 @@ int main()
 
 
         // 3. Rysowanie GUI i obsługa RESETU
-        bool shouldReset = gui.Render(appstate, simulate, Bz, dt, particle, worldHeight, target );
-        // Przekazujemy 0 jako ostatni parametr, bo GUI już nie czyści bufora bezpośrednio.
-        if (shouldReset) {
-            // 1. Fizyka: Czyścimy wektor trajektorii w pamięci RAM
-            particle.trajectory.clear();
+        bool newGameRequested = false;
+        bool retryRequested = false;
 
-            // Dodajemy punkt startowy (0,0), żeby wektor nie był pusty
-            particle.trajectory.push_back(particle.position);
+        // Wywołujemy zaktualizowaną metodę Render (void z referencjami)
+        gui.Render(appstate, simulate, Bz, dt, particle, worldHeight, target, newGameRequested, retryRequested);
+
+        bool performReset = false;
+
+        if (newGameRequested) {
+            target.GenerateNewTarget(worldHeight, aspectRatio); // Losowanie nowego celu
+            performReset = true;
+        }
+
+        if (retryRequested) {
+            target.Reset(); // Tylko reset trafienia, cel bez zmian
+            performReset = true;
+        }
+
+        // Wspólna logika resetu (czyszczenie buforów i ustawienie pozycji)
+        if (performReset) {
+            // 1. Fizyka: Ustalenie pozycji startowej
+            glm::dvec2 startPos(0.0, 0.0);
+            glm::dvec2 startVel = particle.velocity;
+
+            if (appstate == AppState::GAME) {
+                // W grze startujemy z lewej strony
+                startPos = glm::dvec2(-worldWidth / 3.0f, 0.0);
+
+                // Prędkość zawsze w prawo (v, 0)
+                double speed = glm::length(particle.velocity);
+                if (speed == 0) speed = 1.0;
+                startVel = glm::dvec2(speed, 0.0);
+            }
+            else {
+                // W symulacji start ze środka
+                startPos = glm::dvec2(0.0, 0.0);
+                double speed = glm::length(particle.velocity);
+                if (speed == 0) speed = 1.0;
+                startVel = glm::dvec2(speed, 0.0);
+            }
+
+            particle.Reset(startPos, startVel);
+
+            // 1a. Fizyka: Czyścimy wektor trajektorii w pamięci RAM (już zrobione w particle.Reset, ale dla pewności)
+            // particle.trajectory.clear();
+            // particle.trajectory.push_back(particle.position);
 
             // 2. Grafika: "Sierocimy" stary bufor (wyrzucamy śmieci z pamięci karty)
             particleRenderer.ClearTrajectory();
@@ -164,8 +231,9 @@ int main()
             // 3. Aktualizujemy GPU tym jednym, czystym punktem startowym
             particleRenderer.UpdateTrajectory(particle.trajectory);
 
+            // W trybie gry po resecie czekamy na "Strzał"
             if (appstate == AppState::GAME) {
-                target.GenerateNewTarget(worldHeight, aspectRatio); // (Zakładając, że 'aspectRatio' jest dostępne)
+                simulate = false;
             }
         }
 

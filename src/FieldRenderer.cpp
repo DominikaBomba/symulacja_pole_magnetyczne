@@ -22,6 +22,7 @@ const char* BG_FRAGMENT_SOURCE = R"(  // NOLINT(clang-diagnostic-invalid-source-
         // Parametry przekazywane z programu
         uniform float Bz;           // Si³a pola magnetycznego
         uniform float aspectRatio;  // Proporcje okna (szerokoœæ/wysokoœæ)
+		uniform bool gameMode;   // flaga trybu gry
 
         void main() {
             // kolor t³a (ciemnoszary)
@@ -33,6 +34,12 @@ const char* BG_FRAGMENT_SOURCE = R"(  // NOLINT(clang-diagnostic-invalid-source-
                 FragColor = vec4(backgroundColor, 1.0);
                 return;
             }
+			
+			// W trybie gry rysujemy t³o tylko po prawej stronie ekranu
+			if (gameMode && TexCoord.x < 0.5) {
+				FragColor = vec4(backgroundColor, 1.0);
+				return;
+			}
 
             // Skalowanie œwiata
             // Ustalamy, ¿e wysokoœæ widoku to zawsze 4.0 jednostki
@@ -140,11 +147,12 @@ void FieldRenderer::InitRenderData() {
     glBindVertexArray(0);
 }
 
-void FieldRenderer::Draw(float Bz, float aspectRatio) {
+void FieldRenderer::Draw(float Bz, float aspectRatio, bool gameMode) {
     if (bgShader) {
         bgShader->Use();
         bgShader->SetFloat("Bz", Bz);
         bgShader->SetFloat("aspectRatio", aspectRatio);
+		bgShader->SetFloat("gameMode", gameMode);
 
         glBindVertexArray(bgVAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

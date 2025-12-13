@@ -7,7 +7,7 @@ public:
     FieldRenderer();
     ~FieldRenderer();
 
-    void Draw(float Bz, float aspectRatio);
+    void Draw(float Bz, float aspectRatio, bool gameMode);
 
 private:
     GLuint bgVAO, bgVBO, bgEBO;

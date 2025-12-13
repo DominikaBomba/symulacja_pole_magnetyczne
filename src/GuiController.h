@@ -26,6 +26,7 @@ public:
     // G³ówna pêtla rysuj¹ca interfejs.
     // Przyjmujemy referencje do zmiennych, które GUI mo¿e modyfikowaæ.
     // trajectoryVBO przekazujemy po to, aby przycisk Reset móg³ wyczyœciæ bufor graficzny.
-    bool Render(AppState& appstate, bool& simulate, float& Bz, float& dt,
-        Particle& particle, float& worldHeight, Target& target);
+    void Render(AppState& appstate, bool& simulate, float& Bz, float& dt,
+        Particle& particle, float& worldHeight, Target& target,
+        bool& newGameRequested, bool& retryRequested);
 };
