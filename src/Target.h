@@ -6,12 +6,12 @@
 class Target {
 public:
     glm::dvec2 position;
-    float radius; // Promieñ celu [m]
+    float radius; // Promieñ celu
     bool isHit;
 
     Target(float r = 0.5f);
 
-    // Losuje now¹ pozycjê w zakresie (np. +/- 3.0 m), pomijaj¹c okolice (0,0)
+    // Losuje now¹ pozycjê celu
     void GenerateNewTarget(float worldHeight, float aspectRatio);
 
     // Sprawdza kolizjê z cz¹stk¹ (po³o¿enie cz¹stki w promieniu celu)

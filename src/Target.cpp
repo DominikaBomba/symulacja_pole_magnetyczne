@@ -5,21 +5,17 @@
 #include <glm/gtc/epsilon.hpp>
 
 Target::Target(float r) : radius(r), isHit(false) {
-    // Inicjalizacja generatora losowego (raz)
+    // Inicjalizacja generatora losowego
     rng.seed(static_cast<unsigned int>(std::time(0)));
 }
 
 void Target::GenerateNewTarget(float worldHeight, float aspectRatio) {
-    // 1. Definicja rozs¹dnego obszaru losowania
-    // U¿ywamy worldHeight do dynamicznego skalowania. Cel powinien byæ
-	// w polu widzenia (jedynie po prawej stronie ekranu w trybie gry).
-
+    // Definicja rozs¹dnego obszaru losowania - Cel w polu widzenia, jedynie po prawej stronie ekranu
     float worldWidth = worldHeight * aspectRatio;
 
     float minX = 0.0f;
     float maxX = (worldWidth / 2.0f);
 
-    // Y: od do³u do góry minus margines
     float maxY = (worldHeight / 2.0f);
     float minY = -maxY;
 
@@ -50,7 +46,7 @@ bool Target::CheckCollision(const Particle& particle) const {
     double radiusSq = radius * radius;
 
     if (distanceSq <= radiusSq) {
-        // Kolizja!
+        // Kolizja
         return true;
     }
     return false;

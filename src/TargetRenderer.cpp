@@ -3,7 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-/// TargetRenderer.cpp (Shadery celu)
+//Shadery celu
 const char* TARGET_VS = R"(
     #version 330 core
     layout (location = 0) in vec2 aPos;

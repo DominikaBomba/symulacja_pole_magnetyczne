@@ -13,7 +13,7 @@ const char* PARTICLE_VS = R"(
     }
 )";
 
-// Shader cz¹stki (Fragment) - Niebieski kolor
+// Shader cz¹stki (Fragment) (Niebieski kolor)
 const char* PARTICLE_FS = R"(
     #version 330 core
     out vec4 FragColor;
@@ -58,7 +58,7 @@ void ParticleRenderer::InitBuffers() {
 
     glBindVertexArray(trajectoryVAO);
     glBindBuffer(GL_ARRAY_BUFFER, trajectoryVBO);
-    // Rezerwujemy pamiêæ na 10000 punktów
+	// Rezerwujemy pamiêæ no okreœlony MAX_TRAJECTORY_SIZE punktów (2 floaty na punkt: x, y)
     glBufferData(GL_ARRAY_BUFFER, Particle::MAX_TRAJECTORY_SIZE * 2 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -87,17 +87,17 @@ void ParticleRenderer::Draw(const Particle& particle, const glm::mat4& projectio
     shader->Use();
     shader->SetMat4("projection", projection);
 
-    // 1. Aktualizacja pozycji cz¹stki (robimy to co klatkê)
+    //Aktualizacja pozycji cz¹stki (co klatkê)
     float pos[2] = { (float)particle.position.x, (float)particle.position.y };
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
 
-    // 2. Rysowanie cz¹stki
+    //Rysowanie cz¹stki
     glPointSize(10.0f);
     glBindVertexArray(particleVAO);
     glDrawArrays(GL_POINTS, 0, 1);
 
-    // 3. Rysowanie œladu (dane s¹ ju¿ w buforze dziêki UpdateTrajectory)
+    //Rysowanie œladu (dane s¹ ju¿ w buforze dziêki UpdateTrajectory)
     glPointSize(2.0f);
     glBindVertexArray(trajectoryVAO);
     glDrawArrays(GL_POINTS, 0, (GLsizei)particle.trajectory.size());
@@ -111,7 +111,7 @@ void ParticleRenderer::ClearTrajectory() {
     // Wywo³anie glBufferData z NULL powoduje "Buffer Orphaning".
     // Karta graficzna wyrzuca stary wskaŸnik pamiêci i alokuje œwie¿y blok.
     // To zapobiega sytuacji, gdzie GPU czyta stare œmieci podczas nadpisywania.
-    glBufferData(GL_ARRAY_BUFFER, 10000 * 2 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, Particle::MAX_TRAJECTORY_SIZE * 2 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

@@ -1,5 +1,4 @@
 #include "GuiController.h"
-#include <iostream> // Do ew. debugowania
 
 GuiController::GuiController() {}
 
@@ -22,7 +21,7 @@ void GuiController::Shutdown() {
     ImGui::DestroyContext();
 }
 
-// ZMIANA: Funkcja teraz zwraca void, a flagi resetu przekazuje przez referencje
+//renderowanie gui
 void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float& dt,
     Particle& particle, float& worldHeight, Target& target,
     bool& newGameRequested, bool& retryRequested) {
@@ -31,7 +30,7 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
     newGameRequested = false;
     retryRequested = false;
 
-    // Nowa klatka ImGui (kod startowy z maina)
+    // Nowa klatka ImGui
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -40,39 +39,36 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
         ImGui::Begin("MENU");
         ImGui::Text("Select app mode");
 
+        // Zatrzymujemy i reset symulacji lub gry przy wejœciu
         if (ImGui::Button("GAME")) {
             appstate = AppState::GAME;
-            simulate = false;      // Zatrzymujemy symulacjê przy wejœciu
-            retryRequested = true; // Wymuszamy reset (czyszczenie œladu)
+            simulate = false;
+            retryRequested = true;
         }
         if (ImGui::Button("SIMULATION")) {
             appstate = AppState::SIMULATION;
-            simulate = false;      // Zatrzymujemy symulacjê przy wejœciu
-            retryRequested = true; // Wymuszamy reset
+            simulate = false;
+            retryRequested = true;
         } ImGui::End();
     }
 
     if (appstate == AppState::SIMULATION) {
 
         ImGui::Begin("Simulation control");
+
         ImGui::Text("Physics parameters");
 
-        
-
-        ImGui::Separator();
+    	ImGui::Separator();
         ImGui::Text("Magnetic field (B)");
-
         ImGui::SliderFloat("[T]", &Bz, -2.0f, 2.0f);
 
         ImGui::Separator();
         ImGui::Text("Mass (m)");
         ImGui::SliderFloat("[x10^-25 kg]", &particle.mass, 0.1f, 10.0f, "%.1f");
 
-
         ImGui::Separator();
         ImGui::Text("Particle charge (q)");
         ImGui::SliderFloat("[x10^-16 C]", &particle.charge, 1.0f, 10.0f, "%.1f");
-
 
         ImGui::Separator();
         ImGui::Text("Initial velocity (v)");
@@ -81,12 +77,13 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
             particle.SetSpeed(v);
         }
 
-        // ---STEROWANIE SKAL¥ (ZOOM) ---
+        // sterowanie skal¹ (zoomem)
         ImGui::Separator();
 		ImGui::Text("Simulation properties");
         ImGui::Separator();
         ImGui::Text("Zoom");
-        // Domyœlnie 8.0. Mniejsze wartoœci = przybli¿enie.
+
+        // Domyœlnie 8.0f Mniejsze wartoœci - przybli¿enie
         ImGui::SliderFloat("[mm]", &worldHeight, 1.0f, 20.0f, "%.1f");
 
         ImGui::Separator();
@@ -103,7 +100,8 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
 
         ImGui::Separator();
 
-        //spr ¿e nie dzieli przez 0 - denomi to mianownik we wzorze na promien
+        //obliczanie promienia okrêgu po którym porusza siê cz¹steczka
+        //denomi - mianownik we wzorze na promien
         float denomi = std::abs(Bz) * std::abs(particle.charge);
 
         if (denomi > 0.000001f) { // Sprawdzenie, czy mianownik jest bliski zero
@@ -114,10 +112,9 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
             ImGui::Text("Radius (r): infinite");
         }
 
+        //reset
         if (ImGui::Button("Reset")) {
-            // Logika C++
             particle.Reset({ 0.0, 0.0 }, { 1.0, 0.0 });
-
             // Logika wizualna - zg³aszamy ¿¹danie (retry dzia³a jak reset w symulacji)
             retryRequested = true;
         }
@@ -136,13 +133,12 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
         ImGui::Text("Adjust parameters to hit the target!");
         ImGui::Separator();
         if (target.isHit) {
-            // simulate = false; // To obs³ugujemy teraz w main
             ImGui::Separator();
             ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Target hit!");
             ImGui::Separator();
         }
 
-        // BLOKADA INPUTU: parametry zablokowane gdy leci lub trafiono
+        //blokada inputu: parametry zablokowane gdy cz¹steczka leci lub trafiono cel
         bool inputLocked = simulate || target.isHit;
 
         if (inputLocked) {
@@ -151,22 +147,17 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
         else {
             ImGui::Text("Physics parameters");
 
-
-
             ImGui::Separator();
             ImGui::Text("Magnetic field (B)");
-
             ImGui::SliderFloat("[T]", &Bz, -2.0f, 2.0f);
 
             ImGui::Separator();
             ImGui::Text("Mass (m)");
             ImGui::SliderFloat("[x10^-25 kg]", &particle.mass, 0.1f, 10.0f, "%.1f");
 
-
             ImGui::Separator();
             ImGui::Text("Particle charge (q)");
             ImGui::SliderFloat("[x10^-16 C]", &particle.charge, 1.0f, 10.0f, "%.1f");
-
 
             ImGui::Separator();
             ImGui::Text("Initial velocity (v)");
@@ -175,12 +166,12 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
                 particle.SetSpeed(v);
             }
 
-            // ---STEROWANIE SKAL¥ (ZOOM) ---
+            // sterowanie skal¹ (zoomem)
             ImGui::Separator();
             ImGui::Text("Simulation properties");
             ImGui::Separator();
             ImGui::Text("Zoom");
-            // Domyœlnie 8.0. Mniejsze wartoœci = przybli¿enie.
+            // Domyœlnie 8.0f Mniejsze wartoœci - przybli¿enie
             ImGui::SliderFloat("[mm]", &worldHeight, 1.0f, 20.0f, "%.1f");
 
             ImGui::Separator();
@@ -196,7 +187,7 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
 
         ImGui::Separator();
 
-        //spr ¿e nie dzieli przez 0 - denomi to mianownik we wzorze na promien
+        //denomi - mianownik we wzorze na promien
         float denomi = std::abs(Bz) * std::abs(particle.charge);
 
         if (denomi > 0.000001f) { // Sprawdzenie, czy mianownik jest bliski zero
@@ -213,7 +204,7 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
             ImGui::Text("Radius (r): infinite");
         }
 
-        // --- PRZYCISKI STERUJ¥CE ---
+        // pryciski steruj¹ce gr¹
         ImGui::Separator();
 
         if (ImGui::Button("Try again")) {
@@ -223,7 +214,7 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
 
         if (ImGui::Button("New Game")) {
             simulate = false;
-            newGameRequested = true; // Reset + nowy cel
+            newGameRequested = true; // Reset i nowy cel
         }
 
         // Przycisk powrotu, ¿eby nie utkn¹æ w grze

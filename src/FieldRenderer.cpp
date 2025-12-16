@@ -1,4 +1,3 @@
-// ReSharper disable CppClangTidyClangDiagnosticInvalidSourceEncoding
 #include "FieldRenderer.h"
 
 // Vertex Shader t³a
@@ -14,15 +13,15 @@ const char* BG_VERTEX_SOURCE = R"(
     )";
 
 // Fragment Shader t³a
-const char* BG_FRAGMENT_SOURCE = R"(  // NOLINT(clang-diagnostic-invalid-source-encoding)
+const char* BG_FRAGMENT_SOURCE = R"(
         #version 330 core
         out vec4 FragColor;
         in vec2 TexCoord;
 
         // Parametry przekazywane z programu
-        uniform float Bz;           // Si³a pola magnetycznego
-        uniform float aspectRatio;  // Proporcje okna (szerokoœæ/wysokoœæ)
-		uniform bool gameMode;   // flaga trybu gry
+        uniform float Bz;
+        uniform float aspectRatio;
+		uniform bool gameMode;// flaga trybu gry
 
         void main() {
             // kolor t³a (ciemnoszary)
@@ -68,7 +67,6 @@ const char* BG_FRAGMENT_SOURCE = R"(  // NOLINT(clang-diagnostic-invalid-source-
 
             if (Bz > 0.0) {
                 // rysowanie kropki (Dla B > 0) 
-                // Kropka to okr¹g. Sprawdzamy odleg³oœæ od œrodka kratki.
                 float dist = length(p);
                 // smoothstep wyg³adza krawêdzie (antyaliasing)
                 float radius = 0.03 * density; 
@@ -76,17 +74,12 @@ const char* BG_FRAGMENT_SOURCE = R"(  // NOLINT(clang-diagnostic-invalid-source-
             } 
             else {
                 // rysowanie X (Dla B < 0)
-                // Iks to dwie linie: y = x oraz y = -x
-                // Odleg³oœæ od pierwszej przek¹tnej: abs(p.x - p.y)
-                // Odleg³oœæ od drugiej przek¹tnej: abs(p.x + p.y)
-                
                 float d1 = abs(p.x - p.y);
                 float d2 = abs(p.x + p.y);
                 
-                // Bierzemy mniejsz¹ odleg³oœæ (suma dwóch linii)
                 float dist = min(d1, d2);
                 
-                // Ograniczamy d³ugoœæ ramion krzy¿yka (¿eby nie styka³y siê z s¹siadami)
+                // Ograniczamy d³ugoœæ ramion X
                 // Kszta³tujemy go w kwadracie o boku 0.6
                 if (abs(p.x) < 0.1 && abs(p.y) < 0.1) {
                     shape = 1.0 - smoothstep(thickness - 0.02, thickness + 0.02, dist);

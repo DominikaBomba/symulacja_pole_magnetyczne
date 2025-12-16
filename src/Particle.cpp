@@ -64,5 +64,5 @@ void Particle::SetSpeed(double newSpeed) {
     if (currentSpeed > 0.0)
         velocity = glm::normalize(velocity) * newSpeed;
     else
-        velocity = glm::dvec2(newSpeed, 0.0); // jeśli prędkość była 0, nadaj w osi X
+        velocity = glm::dvec2(newSpeed, 0.0); // jeśli prędkość jest 0, nadaj w osi X
 }
