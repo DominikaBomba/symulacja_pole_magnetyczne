@@ -22,7 +22,7 @@
 #include "GuiController.h"
 
 using namespace std;
-
+//ZMIANY 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
