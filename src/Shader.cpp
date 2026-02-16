@@ -29,7 +29,9 @@ Shader::Shader(const char* vertexSource, const char* fragmentSource) {
 void Shader::Use() {
     glUseProgram(ID);
 }
-
+void Shader::SetVec4(const std::string& name, const glm::vec4& value) const {
+    glUniform4f(glGetUniformLocation(ID, name.c_str()), value.x, value.y, value.z, value.w);
+}
 void Shader::SetFloat(const std::string& name, float value) const {
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }

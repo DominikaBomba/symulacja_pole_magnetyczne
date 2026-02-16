@@ -4,12 +4,12 @@
 // Shader cz¹stki (Vertex)
 const char* PARTICLE_VS = R"(
     #version 330 core
-    layout (location = 0) in vec2 aPos;
+    layout (location = 0) in vec3 aPos;
     
     uniform mat4 projection;
 
     void main() { 
-        gl_Position = projection * vec4(aPos, 0.0, 1.0); 
+        gl_Position = projection * vec4(aPos, 1.0); 
     }
 )";
 
@@ -59,23 +59,20 @@ void ParticleRenderer::InitBuffers() {
     glBindVertexArray(trajectoryVAO);
     glBindBuffer(GL_ARRAY_BUFFER, trajectoryVBO);
 	// Rezerwujemy pamiêæ no okreœlony MAX_TRAJECTORY_SIZE punktów (2 floaty na punkt: x, y)
-    glBufferData(GL_ARRAY_BUFFER, Particle::MAX_TRAJECTORY_SIZE * 2 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 5000 * 2 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 }
 
-void ParticleRenderer::UpdateTrajectory(const std::vector<glm::dvec2>& trajectory) {
-    // Konwersja double (dvec2) na float, bo OpenGL woli floaty
+void ParticleRenderer::UpdateTrajectory(const std::vector<glm::dvec3>& trajectory) {
     std::vector<float> points;
-    points.reserve(trajectory.size() * 2);
-
+    points.reserve(trajectory.size() * 3);
     for (const auto& p : trajectory) {
         points.push_back((float)p.x);
         points.push_back((float)p.y);
+        points.push_back((float)p.z);
     }
-
-    // Przes³anie danych do GPU
     glBindBuffer(GL_ARRAY_BUFFER, trajectoryVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, points.size() * sizeof(float), points.data());
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -86,9 +83,9 @@ void ParticleRenderer::Draw(const Particle& particle, const glm::mat4& projectio
 
     shader->Use();
     shader->SetMat4("projection", projection);
-
+    glm::dvec3 pPos = particle.GetPosition();
     //Aktualizacja pozycji cz¹stki (co klatkê)
-    float pos[2] = { (float)particle.position.x, (float)particle.position.y };
+    float pos[3] = { (float)pPos.x, (float)pPos.y, (float)pPos.z };
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
 
@@ -100,7 +97,8 @@ void ParticleRenderer::Draw(const Particle& particle, const glm::mat4& projectio
     //Rysowanie œladu (dane s¹ ju¿ w buforze dziêki UpdateTrajectory)
     glPointSize(2.0f);
     glBindVertexArray(trajectoryVAO);
-    glDrawArrays(GL_POINTS, 0, (GLsizei)particle.trajectory.size());
+    const auto& traj = particle.GetTrajectory();
+    glDrawArrays(GL_LINE_STRIP, 0, (GLsizei)traj.size()); // LINE_STRIP wygl¹da lepiej ni¿ POINTS
 
     glBindVertexArray(0);
 }
@@ -111,7 +109,7 @@ void ParticleRenderer::ClearTrajectory() {
     // Wywo³anie glBufferData z NULL powoduje "Buffer Orphaning".
     // Karta graficzna wyrzuca stary wskaŸnik pamiêci i alokuje œwie¿y blok.
     // To zapobiega sytuacji, gdzie GPU czyta stare œmieci podczas nadpisywania.
-    glBufferData(GL_ARRAY_BUFFER, Particle::MAX_TRAJECTORY_SIZE * 2 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 5000 * 3 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

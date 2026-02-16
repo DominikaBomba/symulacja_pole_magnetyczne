@@ -1,7 +1,7 @@
 #pragma once
 #include <glad/glad.h> // Potrzebne dla GLuint (trajectoryVBO)
 #include <GLFW/glfw3.h>
-
+#include <glm/glm.hpp> // Dodane dla dvec3
 #include "Target.h" 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -26,7 +26,15 @@ public:
     // G³ówna pêtla rysuj¹ca interfejs.
     // Przyjmujemy referencje do zmiennych, które GUI mo¿e modyfikowaæ.
     // trajectoryVBO przekazujemy po to, aby przycisk Reset móg³ wyczyœciæ bufor graficzny.
-    void Render(AppState& appstate, bool& simulate, float& Bz, float& dt,
-        Particle& particle, float& worldHeight, Target& target,
-        bool& newGameRequested, bool& retryRequested);
+    void Render(
+        AppState& appstate,
+        bool& simulate, 
+        glm::dvec3& B, 
+        
+        float& dt,
+        Particle& particle, 
+        float& worldHeight, 
+        Target& target,
+        bool& newGameRequested,
+        bool& retryRequested);
 };

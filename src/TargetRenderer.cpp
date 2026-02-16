@@ -6,10 +6,10 @@
 //Shadery celu
 const char* TARGET_VS = R"(
     #version 330 core
-    layout (location = 0) in vec2 aPos;
+    layout (location = 0) in vec3 aPos;
     uniform mat4 projection;
     void main() { 
-        gl_Position = projection * vec4(aPos, 0.0, 1.0); 
+        gl_Position = projection * vec4(aPos, 1.0); 
     }
 )";
 
@@ -44,8 +44,8 @@ void TargetRenderer::InitBuffers() {
     glBindVertexArray(targetVAO);
     glBindBuffer(GL_ARRAY_BUFFER, targetVBO);
     // Rezerwujemy pamiêæ na 1 punkt (2 floaty: x, y)
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3, nullptr, GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 }
@@ -57,7 +57,7 @@ void TargetRenderer::Draw(const Target& target, const glm::mat4& projection, flo
     shader->SetMat4("projection", projection);
 
     // 1. Aktualizacja pozycji celu
-    float pos[2] = { (float)target.position.x, (float)target.position.y };
+    float pos[3] = { (float)target.position.x, (float)target.position.y, (float)target.position.z };
     glBindBuffer(GL_ARRAY_BUFFER, targetVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pos), pos);
 

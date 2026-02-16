@@ -19,15 +19,17 @@ void Target::GenerateNewTarget(float worldHeight, float aspectRatio) {
     float maxY = (worldHeight / 2.0f);
     float minY = -maxY;
 
+
+
     // Zabezpieczenie gdyby ekran by³ bardzo ma³y
     if (maxX < minX) maxX = minX;
 
     std::uniform_real_distribution<double> dist_x(minX, maxX);
     std::uniform_real_distribution<double> dist_y(minY, maxY);
-
+    std::uniform_real_distribution<double> dist_z(minY, maxY);
     position.x = dist_x(rng);
     position.y = dist_y(rng);
-
+    position.z = dist_z(rng);
     isHit = false;
 
     std::cout << "Nowy Cel: (" << position.x << ", " << position.y << "), Promien: " << radius << std::endl;
@@ -36,10 +38,14 @@ void Target::GenerateNewTarget(float worldHeight, float aspectRatio) {
 bool Target::CheckCollision(const Particle& particle) const {
     if (isHit) return true; // Ju¿ trafiony
 
+
+    glm::dvec3 pPos = particle.GetPosition();
     // Obliczamy kwadrat odleg³oœci (szybsze ni¿ liczenie pierwiastka)
-    double dx = particle.position.x - position.x;
-    double dy = particle.position.y - position.y;
-    double distanceSq = dx * dx + dy * dy;
+    double dx = pPos.x - position.x;
+    double dy = pPos.y - position.y;
+    double dz = pPos.z - position.z;
+    double distanceSq = dx * dx + dy * dy + dz * dz;
+
 
     // Zak³adamy, ¿e promieñ cz¹stki jest zaniedbywalnie ma³y (punkt).
     // U¿ywamy tylko promienia celu.

@@ -5,7 +5,7 @@
 
 class Target {
 public:
-    glm::dvec2 position;
+    glm::dvec3 position;
     float radius; // Promieñ celu
     bool isHit;
 

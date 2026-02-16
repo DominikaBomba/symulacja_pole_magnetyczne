@@ -1,33 +1,37 @@
-﻿#pragma once
-#include <glm/glm.hpp>
+﻿// Particle.h
+#pragma once
 #include <vector>
+#include <glm/glm.hpp>
 
 class Particle {
 public:
-    static const int MAX_TRAJECTORY_SIZE = 10000;
-    glm::dvec2 position;
-    glm::dvec2 velocity;
-    float charge;
-    float mass;
-    std::vector<glm::dvec2> trajectory;
 
-    Particle(
-        const glm::dvec2& pos = glm::dvec2(0.0, 0.0),
-        const glm::dvec2& vel = glm::dvec2(0.0, 0.0),
-        float q = 1.0,
-        float m = 1.0);
+    std::vector<glm::dvec3> trajectory;
+    // Nasz nowy "kontener" na 3D
+    struct State {
+        glm::dvec3 pos;
+        glm::dvec3 vel;
 
-    // Siła Lorentza: F = q * (v * B)
-    glm::dvec2 LorentzForce(float Bz) const;
-
-    // Pochodne [dx/dt, dy/dt, dvx/dt, dvy/dt]
-    glm::dvec4 Derivatives(float Bz) const;
-
-    // Aktualizacja metod Runge Kutta 4 rzędu
-    void UpdateRK4(float dt, float Bz);
-
-    void Reset(const glm::dvec2& pos, const glm::dvec2& vel);
-
+        // Przeciążenia operatorów, żeby RK4 w .cpp wyglądało jak matematyka
+        State operator+(const State& other) const { return { pos + other.pos, vel + other.vel }; }
+        State operator*(double dt) const { return { pos * dt, vel * dt }; }
+    };
+    glm::dvec3 GetVelocity() const { return velocity; }
+    Particle(const glm::dvec3& pos, const glm::dvec3& vel, double q, double m);
+    glm::dvec3 LorentzForce(const glm::dvec3& B) const;
+    State GetDerivatives(const State& s, const glm::dvec3& B) const;
+    void UpdateRK4(double dt, const glm::dvec3& B);
+    void Reset(const glm::dvec3& pos, const glm::dvec3& vel);
     void SetSpeed(double newSpeed);
 
+    // Gettery
+    glm::dvec3 GetPosition() const { return position; }
+    const std::vector<glm::dvec3>& GetTrajectory() const { return trajectory; }
+
+private:
+    glm::dvec3 position;
+    glm::dvec3 velocity;
+    double charge;
+    double mass;
+    static const size_t MAX_TRAJECTORY_SIZE = 5000;
 };

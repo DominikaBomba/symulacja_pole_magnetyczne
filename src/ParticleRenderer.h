@@ -11,7 +11,7 @@ public:
     ~ParticleRenderer();
 
     // Aktualizuje bufor trajektorii 
-    void UpdateTrajectory(const std::vector<glm::dvec2>& trajectory);
+    void UpdateTrajectory(const std::vector<glm::dvec3>& trajectory);
 
     // Rysuje cz¹stkê i jej œlad
     void Draw(const Particle& particle, const glm::mat4& projection);
