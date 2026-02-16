@@ -138,8 +138,6 @@ int main()
         glfwGetFramebufferSize(window, &width, &height);
         if (height == 0) height = 1;
         float aspectRatio = (float)width / (float)height;
-
-        // Pozycja kamery wyliczona z kątów i dystansu (zoom)
         float camX = cameraDistance * cos(cameraAngleX) * sin(cameraAngleY);
         float camY = cameraDistance * sin(cameraAngleX);
         float camZ = cameraDistance * cos(cameraAngleX) * cos(cameraAngleY);
@@ -179,21 +177,29 @@ int main()
         }
 
         // --- 4. RENDEROWANIE ---
+        
+      // --- 4. RENDEROWANIE ---
         glViewport(0, 0, width, height);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (appstate == AppState::SIMULATION || appstate == AppState::GAME) {
-            // Tło (pole) - rysujemy jako pierwsze (często bez testu głębi)
+
+            // TŁO – bez depth testu
+            glDisable(GL_DEPTH_TEST);
             fieldRenderer.Draw(B_field.z, aspectRatio, appstate == AppState::GAME);
 
-            // Obiekty 3D
+            // OBIEKTY 3D – z depth testem
+            glEnable(GL_DEPTH_TEST);
             axesRenderer.Draw(pv);
+
             if (appstate == AppState::GAME) {
                 targetRenderer.Draw(target, pv, worldHeight);
             }
+
             particleRenderer.Draw(particle, pv);
         }
+
 
         // --- 5. GUI I RESET ---
         bool newGameRequested = false;
