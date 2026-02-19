@@ -23,7 +23,7 @@ Particle::State Particle::GetDerivatives(const State& s, const glm::dvec3& B) co
     return { s.vel, acceleration };
 }
 void Particle::UpdateRK4(double dt, const glm::dvec3& B) {
-    // Lambda akceptuje i zwraca strukturę State
+  
   auto f = [&](const State& s) -> State {
         return GetDerivatives(s, B);
     };
@@ -46,7 +46,7 @@ void Particle::UpdateRK4(double dt, const glm::dvec3& B) {
 
     // Opcjonalne: usuwanie najstarszych punktów, by nie zapchać RAMu
     if (trajectory.size() >= MAX_TRAJECTORY_SIZE) {
-        trajectory.erase(trajectory.begin());
+        trajectory.erase(trajectory.begin(), trajectory.begin() + 100);
     }
     trajectory.push_back(position);
 }

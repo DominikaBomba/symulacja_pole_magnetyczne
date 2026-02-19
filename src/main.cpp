@@ -90,13 +90,13 @@ int main()
 
     ParticleRenderer particleRenderer;
 
-    Particle particle({ 0.0, 0.0, 0.0 }, { 1.0, 0.0, 0.0 }, 1.0, 0.1);
+    Particle particle({ 0.0, 0.0, 0.0 }, { 1.0, 0.0, 0.0 }, 1.0, 0.5);
     
     GuiController gui;
     gui.Init(window);
 
-    glm::dvec3 B_field(0.0, 0.0, -1.0);
-    float dt = 0.0015f;
+    glm::dvec3 B_field(0.0, 0.0, -0.5);
+    float dt = 0.0005f;
     bool simulate = false;
     float worldHeight = 8.0f;
     bool firstGameEntry = true;
@@ -120,7 +120,6 @@ int main()
                     cameraAngleY += (float)(mouseX - lastMouseX) * 0.01f;
                     cameraAngleX += (float)(mouseY - lastMouseY) * 0.01f;
 
-                    // Ograniczenie obrotu góra/dół (blokada "fikołka")
                     if (cameraAngleX > 1.5f) cameraAngleX = 1.5f;
                     if (cameraAngleX < -1.5f) cameraAngleX = -1.5f;
                 }
@@ -165,9 +164,11 @@ int main()
             if (appstate == AppState::GAME && particle.GetPosition().x < 0.0) {
                 effectiveB = glm::dvec3(0.0);
             }
-            particle.UpdateRK4(dt, effectiveB);
-            particleRenderer.UpdateTrajectory(particle.GetTrajectory());
 
+            for (int i = 0; i < 10; i++) { 
+                particle.UpdateRK4(dt / 10.0, effectiveB);
+            }
+            particleRenderer.UpdateTrajectory(particle.GetTrajectory());
             if (appstate == AppState::GAME && !target.isHit) {
                 if (target.CheckCollision(particle)) {
                     target.isHit = true;

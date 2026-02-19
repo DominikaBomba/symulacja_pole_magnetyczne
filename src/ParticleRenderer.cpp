@@ -38,29 +38,25 @@ ParticleRenderer::~ParticleRenderer() {
 void ParticleRenderer::InitShader() {
     shader = new Shader(PARTICLE_VS, PARTICLE_FS);
 }
-
 void ParticleRenderer::InitBuffers() {
-    // 1. Inicjalizacja bufora Cz¹stki
+    // 1. Cz¹stka
     glGenVertexArrays(1, &particleVAO);
     glGenBuffers(1, &particleVBO);
-
     glBindVertexArray(particleVAO);
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
-    // Rezerwujemy pamiêæ na 1 punkt (2 floaty: x, y)
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    // Zmieniono na 3 floaty (x, y, z)
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3, nullptr, GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
 
-    // 2. Inicjalizacja bufora Trajektorii
+    // 2. Trajektoria
     glGenVertexArrays(1, &trajectoryVAO);
     glGenBuffers(1, &trajectoryVBO);
-
     glBindVertexArray(trajectoryVAO);
     glBindBuffer(GL_ARRAY_BUFFER, trajectoryVBO);
-	// Rezerwujemy pamiêæ no okreœlony MAX_TRAJECTORY_SIZE punktów (2 floaty na punkt: x, y)
-    glBufferData(GL_ARRAY_BUFFER, 5000 * 2 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    // Zmieniono na 5000 punktów * 3 wspó³rzêdne
+    glBufferData(GL_ARRAY_BUFFER, 5000 * 3 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 }
@@ -106,9 +102,7 @@ void ParticleRenderer::Draw(const Particle& particle, const glm::mat4& projectio
 void ParticleRenderer::ClearTrajectory() {
     glBindBuffer(GL_ARRAY_BUFFER, trajectoryVBO);
 
-    // Wywo³anie glBufferData z NULL powoduje "Buffer Orphaning".
-    // Karta graficzna wyrzuca stary wskaŸnik pamiêci i alokuje œwie¿y blok.
-    // To zapobiega sytuacji, gdzie GPU czyta stare œmieci podczas nadpisywania.
+  
     glBufferData(GL_ARRAY_BUFFER, 5000 * 3 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
