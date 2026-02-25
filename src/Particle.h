@@ -1,12 +1,15 @@
 ﻿// Particle.h
 #pragma once
-#include <vector>
+#include <deque> //kolejka dwukierunkowa żeby zoptymalizować usuwanie najstarszych punktów trajektorii
 #include <glm/glm.hpp>
 
 class Particle {
 public:
+	//dajemy trajectory size do public, żeby renderer mógł z niego korzystać
+    //constexpr, bo to stała, która nie będzie się zmieniać w czasie działania programu
+	static constexpr size_t MAX_TRAJECTORY_SIZE = 15000; 
 
-    std::vector<glm::dvec3> trajectory;
+    std::deque<glm::dvec3> trajectory;
     // Nasz nowy "kontener" na 3D
     struct State {
         glm::dvec3 pos;
@@ -26,12 +29,19 @@ public:
 
     // Gettery
     glm::dvec3 GetPosition() const { return position; }
-    const std::vector<glm::dvec3>& GetTrajectory() const { return trajectory; }
+    const std::deque<glm::dvec3>& GetTrajectory() const { return trajectory; }
+
+    double GetCharge() const { return charge; }
+    void SetCharge(double q) { charge = q; }
+
+    double GetMass() const { return mass; }
+    void SetMass(double m) {
+        if (m > 0.0) mass = m;
+    }
 
 private:
     glm::dvec3 position;
     glm::dvec3 velocity;
     double charge;
     double mass;
-    static const size_t MAX_TRAJECTORY_SIZE = 5000;
 };

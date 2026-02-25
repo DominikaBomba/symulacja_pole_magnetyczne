@@ -36,5 +36,7 @@ public:
         float& worldHeight, 
         Target& target,
         bool& newGameRequested,
-        bool& retryRequested);
+        bool& retryRequested,
+        float& simAngleYaw,
+        float& simAnglePitch);
 };

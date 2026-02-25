@@ -7,7 +7,6 @@ Particle::Particle(
     double m)  // Zmieniono na double
     : position(pos), velocity(vel), charge(q), mass(m)
 {
-    trajectory.reserve(MAX_TRAJECTORY_SIZE);
     trajectory.push_back(position);
 }
 
@@ -46,7 +45,9 @@ void Particle::UpdateRK4(double dt, const glm::dvec3& B) {
 
     // Opcjonalne: usuwanie najstarszych punktów, by nie zapchać RAMu
     if (trajectory.size() >= MAX_TRAJECTORY_SIZE) {
-        trajectory.erase(trajectory.begin(), trajectory.begin() + 100);
+        for (int i = 0; i < 100; ++i) {
+            trajectory.pop_front();
+        }
     }
     trajectory.push_back(position);
 }

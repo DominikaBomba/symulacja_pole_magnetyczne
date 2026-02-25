@@ -20,8 +20,8 @@
 #include "AxesRenderer.h"
 #include "ParticleRenderer.h"
 #include "GuiController.h"
+#include "VectorFieldRenderer.h"
 
-using namespace std;
 //ZMIANY 
 float cameraDistance = 30.0f;
 float cameraAngleX = 0.5f; // Kąt obrotu góra/dół
@@ -47,7 +47,7 @@ int main()
 
 
     if (!glfwInit()) {
-        cerr << "Inicjacja GLFW się nie udała\n";
+        std::cerr << "Inicjacja GLFW się nie udała\n";
         return -1;
     }
 
@@ -62,7 +62,7 @@ int main()
     
     GLFWwindow* window = glfwCreateWindow(1280, 720, "Particle in a magnetic field simulation", nullptr, nullptr);
     if (!window) {
-        cerr << "Nie udało się utworzyć okna GLFW\n";
+        std::cerr << "Nie udało się utworzyć okna GLFW\n";
         glfwTerminate();
         return -1;
     }
@@ -75,7 +75,7 @@ int main()
 
    
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        cerr << "Nie udało się załadować GLAD\n";
+	    std::cerr << "Nie udało się załadować GLAD\n";
         return -1;
     }
 
@@ -85,6 +85,8 @@ int main()
     TargetRenderer targetRenderer;
 
     FieldRenderer fieldRenderer;
+
+	VectorFieldRenderer vectorFieldRenderer;
 
     AxesRenderer axesRenderer;
 
@@ -100,6 +102,9 @@ int main()
     bool simulate = false;
     float worldHeight = 8.0f;
     bool firstGameEntry = true;
+
+    float simAngleYaw = 0.0f;
+    float simAnglePitch = 0.0f;
 
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST); 
@@ -176,9 +181,7 @@ int main()
                 }
             }
         }
-
-        // --- 4. RENDEROWANIE ---
-        
+                
       // --- 4. RENDEROWANIE ---
         glViewport(0, 0, width, height);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -186,12 +189,15 @@ int main()
 
         if (appstate == AppState::SIMULATION || appstate == AppState::GAME) {
 
-            // TŁO – bez depth testu
-            glDisable(GL_DEPTH_TEST);
-            fieldRenderer.Draw(B_field.z, aspectRatio, appstate == AppState::GAME);
-
-            // OBIEKTY 3D – z depth testem
             glEnable(GL_DEPTH_TEST);
+
+            //siatka podłogi
+            fieldRenderer.Draw(pv);
+
+            //pole wektorowe
+			vectorFieldRenderer.Draw(pv, B_field, appstate == AppState::GAME);
+
+            //osie i reszta
             axesRenderer.Draw(pv);
 
             if (appstate == AppState::GAME) {
@@ -205,17 +211,43 @@ int main()
         // --- 5. GUI I RESET ---
         bool newGameRequested = false;
         bool retryRequested = false;
-        gui.Render(appstate, simulate, B_field, dt, particle, worldHeight, target, newGameRequested, retryRequested);
+        gui.Render(appstate, simulate, B_field, dt, particle, worldHeight, target, newGameRequested, retryRequested, simAngleYaw, simAnglePitch);
 
         if (newGameRequested || retryRequested) {
             if (newGameRequested) target.GenerateNewTarget(worldHeight, aspectRatio);
             else target.Reset();
 
             float worldWidth = worldHeight * aspectRatio;
-            glm::dvec3 startPos = (appstate == AppState::GAME) ? glm::dvec3(-worldWidth / 3.0, 0.0, 0.0) : glm::dvec3(0.0);
-            particle.Reset(startPos, glm::dvec3(1.0, 0.0, 0.0));
+            glm::dvec3 startPos = glm::dvec3(0.0);
+            glm::dvec3 startDir = glm::dvec3(1.0, 0.0, 0.0); // Domyślnie w prawo (oś X)
+
+            if (appstate == AppState::GAME) {
+                // W trybie gry cząstka startuje z lewej strony i zawsze celuje w prawo
+                startPos = glm::dvec3(-worldWidth / 3.0, 0.0, 0.0);
+                startDir = glm::dvec3(1.0, 0.0, 0.0);
+            }
+            else {
+                // W symulacji cząstka startuje ze środka
+                startPos = glm::dvec3(0.0);
+
+                // --- Sferyczny układ współrzędnych na Kartezjański (3D) ---
+                startDir.x = cos(simAnglePitch) * cos(simAngleYaw);
+                startDir.y = sin(simAnglePitch);
+                startDir.z = cos(simAnglePitch) * sin(simAngleYaw);
+                startDir = glm::normalize(startDir);
+            }
+
+            // Zachowujemy aktualną prędkość całkowitą cząsteczki
+            double speed = glm::length(particle.GetVelocity());
+            if (speed == 0.0) speed = 1.0;
+
+            // Resetujemy cząstkę nadając jej nową pozycję i wyliczony kierunek prędkości
+            particle.Reset(startPos, startDir * speed);
+
+            // Czyścimy grafikę
             particleRenderer.ClearTrajectory();
             particleRenderer.UpdateTrajectory(particle.GetTrajectory());
+
             if (appstate == AppState::GAME) simulate = false;
         }
 
