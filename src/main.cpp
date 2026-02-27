@@ -200,11 +200,21 @@ int main()
             //osie i reszta
             axesRenderer.Draw(pv);
 
+			//cząsteczka i target (gdy jest w trybie gry)
             if (appstate == AppState::GAME) {
                 targetRenderer.Draw(target, pv, worldHeight);
+                particleRenderer.Draw(particle, pv, false);
             }
+            else 
+            {
+                glm::vec3 initialDir(
+                    cos(simAnglePitch) * cos(simAngleYaw),
+                    sin(simAnglePitch),
+                    cos(simAnglePitch) * sin(simAngleYaw)
+                );
 
-            particleRenderer.Draw(particle, pv);
+                particleRenderer.Draw(particle, pv, true, initialDir);
+            }
         }
 
 

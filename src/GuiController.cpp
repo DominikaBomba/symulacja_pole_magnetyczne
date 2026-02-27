@@ -120,18 +120,46 @@ void GuiController::Render(AppState& appstate, bool& simulate, glm::dvec3& B, fl
         }
 
         ImGui::Separator();
+        ImGui::Text("Graphics:");
+
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.8f, 0.2f, 0.6f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.9f, 0.9f, 0.3f, 0.6f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(1.0f, 1.0f, 0.4f, 0.6f));
+
+        int currentTrajSize = (int)particle.GetMaxTrajectorySize();
+        if (ImGui::SliderInt("Trajectory length", &currentTrajSize, 100, (int)Particle::ABSOLUTE_MAX_TRAJECTORY)) {
+            particle.SetMaxTrajectorySize((size_t)currentTrajSize);
+        }
+
+        ImGui::PopStyleColor(3);
+
+        ImGui::Separator();
         ImGui::Text("Time");
         ImGui::SliderFloat("Time step [dt]", &dt, 0.00001f, 0.005f, "%.5f");
 
-        ImGui::Separator();
-
-        if (appstate == AppState::SIMULATION) {
+        
+        if (appstate == AppState::SIMULATION && !simulate)
+        {
+            ImGui::Separator();
             ImGui::Text("Initial direction:");
 
-            // ImGui automatycznie konwertuje stopnie w UI na radiany pod maska!
-            ImGui::SliderAngle("Azimuth (left/right)", &simAngleYaw, -180.0f, 180.0f);
-            ImGui::SliderAngle("Elevation (Up/Down)", &simAnglePitch, -89.0f, 89.0f); // Ograniczamy do 89 stopni by unikn¹æ tzw. Gimbal Lock
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 0.3f, 0.8f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(1.0f, 0.4f, 0.9f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(1.0f, 0.6f, 0.8f, 1.0f));
 
+            // ImGui automatycznie konwertuje stopnie w UI na radiany pod maska!
+            if (ImGui::SliderAngle("Azimuth (Left/Right)", &simAngleYaw, -180.0f, 180.0f)) {
+                retryRequested = true;
+            }
+
+            if (ImGui::SliderAngle("Elevation (Up/Down)", &simAnglePitch, -89.0f, 89.0f)) {  // Ograniczamy do 89 stopni by unikn¹æ tzw. Gimbal Lock
+                retryRequested = true;
+            }
+
+            ImGui::PopStyleColor(3);
+        }
+
+        if (appstate == AppState::SIMULATION) {
             ImGui::Separator();
             if (ImGui::Button("Start")) simulate = true;
             ImGui::SameLine();

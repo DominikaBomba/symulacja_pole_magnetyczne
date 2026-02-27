@@ -7,7 +7,7 @@ class Particle {
 public:
 	//dajemy trajectory size do public, żeby renderer mógł z niego korzystać
     //constexpr, bo to stała, która nie będzie się zmieniać w czasie działania programu
-	static constexpr size_t MAX_TRAJECTORY_SIZE = 15000; 
+	static constexpr size_t ABSOLUTE_MAX_TRAJECTORY = 50000; 
 
     std::deque<glm::dvec3> trajectory;
     // Nasz nowy "kontener" na 3D
@@ -39,9 +39,14 @@ public:
         if (m > 0.0) mass = m;
     }
 
+    size_t GetMaxTrajectorySize() const { return maxTrajectorySize; }
+    void SetMaxTrajectorySize(size_t newSize);
+
 private:
     glm::dvec3 position;
     glm::dvec3 velocity;
     double charge;
     double mass;
+
+	size_t maxTrajectorySize = 5000; // Domyślna maksymalna długość trajektorii, można ją zmieniać przez GUI
 };

@@ -44,10 +44,8 @@ void Particle::UpdateRK4(double dt, const glm::dvec3& B) {
     velocity = y.vel;
 
     // Opcjonalne: usuwanie najstarszych punktów, by nie zapchać RAMu
-    if (trajectory.size() >= MAX_TRAJECTORY_SIZE) {
-        for (int i = 0; i < 100; ++i) {
-            trajectory.pop_front();
-        }
+    while (trajectory.size() >= maxTrajectorySize) {
+        trajectory.pop_front();
     }
     trajectory.push_back(position);
 }
@@ -65,4 +63,16 @@ void Particle::SetSpeed(double newSpeed) {
         velocity = glm::normalize(velocity) * newSpeed;
     else
         velocity = glm::dvec3(newSpeed, 0.0, 0.0); // jeśli prędkość jest 0, nadaj w osi X
+}
+
+void Particle::SetMaxTrajectorySize(size_t newSize) {
+    if (newSize > ABSOLUTE_MAX_TRAJECTORY) newSize = ABSOLUTE_MAX_TRAJECTORY;
+    if (newSize < 10) newSize = 10; // Minimalny sensowny ślad
+
+    maxTrajectorySize = newSize;
+
+    // Jeśli zmniejszyliśmy limit, ucinamy stary ogon, by natychmiast dopasować go do nowego rozmiaru
+    while (trajectory.size() > maxTrajectorySize) {
+        trajectory.pop_front();
+    }
 }
