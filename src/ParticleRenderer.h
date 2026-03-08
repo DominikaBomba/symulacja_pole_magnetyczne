@@ -1,7 +1,7 @@
 #pragma once
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-#include <vector>
+#include <deque>
 #include "Shader.h"
 #include "Particle.h"
 
@@ -11,10 +11,10 @@ public:
     ~ParticleRenderer();
 
     // Aktualizuje bufor trajektorii 
-    void UpdateTrajectory(const std::vector<glm::dvec2>& trajectory);
+    void UpdateTrajectory(const std::deque<glm::dvec3>& trajectory);
 
     // Rysuje cz¹stkê i jej œlad
-    void Draw(const Particle& particle, const glm::mat4& projection);
+    void Draw(const Particle& particle, const glm::mat4& projection, bool drawInitialDir, const glm::vec3& initialDir = glm::vec3(0.0f));
 
 	//czyœci bufor trajektorii i resetuje w pamiêci GPU
     void ClearTrajectory();

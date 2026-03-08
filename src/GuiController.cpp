@@ -1,4 +1,5 @@
 #include "GuiController.h"
+#include <glm/glm.hpp>
 
 GuiController::GuiController() {}
 
@@ -21,16 +22,13 @@ void GuiController::Shutdown() {
     ImGui::DestroyContext();
 }
 
-//renderowanie gui
-void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float& dt,
+void GuiController::Render(AppState& appstate, bool& simulate, glm::dvec3& B, float& dt,
     Particle& particle, float& worldHeight, Target& target,
-    bool& newGameRequested, bool& retryRequested) {
+    bool& newGameRequested, bool& retryRequested, float& simAngleYaw, float& simAnglePitch) {
 
-    // Reset flag na pocz¹tku klatki
     newGameRequested = false;
     retryRequested = false;
 
-    // Nowa klatka ImGui
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -39,194 +37,156 @@ void GuiController::Render(AppState& appstate, bool& simulate, float& Bz, float&
         ImGui::Begin("MENU");
         ImGui::Text("Select app mode");
 
-        // Zatrzymujemy i reset symulacji lub gry przy wejœciu
-        if (ImGui::Button("GAME")) {
+        if (ImGui::Button("GAME", ImVec2(200, 40))) {
             appstate = AppState::GAME;
             simulate = false;
             retryRequested = true;
         }
-        if (ImGui::Button("SIMULATION")) {
+        if (ImGui::Button("SIMULATION", ImVec2(200, 40))) {
             appstate = AppState::SIMULATION;
             simulate = false;
             retryRequested = true;
-        } ImGui::End();
-    }
-
-    if (appstate == AppState::SIMULATION) {
-
-        ImGui::Begin("Simulation control");
-
-        ImGui::Text("Physics parameters");
-
-    	ImGui::Separator();
-        ImGui::Text("Magnetic field (B)");
-        ImGui::SliderFloat("[T]", &Bz, -2.0f, 2.0f);
-
-        ImGui::Separator();
-        ImGui::Text("Mass (m)");
-        ImGui::SliderFloat("[x10^-25 kg]", &particle.mass, 0.1f, 10.0f, "%.1f");
-
-        ImGui::Separator();
-        ImGui::Text("Particle charge (q)");
-        ImGui::SliderFloat("[x10^-16 C]", &particle.charge, 1.0f, 10.0f, "%.1f");
-
-        ImGui::Separator();
-        ImGui::Text("Initial velocity (v)");
-        static float v = 1.0f;
-        if (ImGui::SliderFloat("[x10^6 m/s]", &v, 0.1f, 5.0f, "%.1f")) {
-            particle.SetSpeed(v);
-        }
-
-        // sterowanie skal¹ (zoomem)
-        ImGui::Separator();
-		ImGui::Text("Simulation properties");
-        ImGui::Separator();
-        ImGui::Text("Zoom");
-
-        // Domyœlnie 8.0f Mniejsze wartoœci - przybli¿enie
-        ImGui::SliderFloat("[mm]", &worldHeight, 1.0f, 20.0f, "%.1f");
-
-        ImGui::Separator();
-
-        ImGui::Text("Time step (dt)");
-        ImGui::SliderFloat("[dt]", &dt, 0.00001f, 0.005f, "%.5f");
-        
-        ImGui::Separator();
-        if (ImGui::Button("Start")) simulate = true;
-
-        ImGui::SameLine();
-        if (ImGui::Button("Stop")) simulate = false;
-        ImGui::SameLine();
-
-        ImGui::Separator();
-
-        //obliczanie promienia okrêgu po którym porusza siê cz¹steczka
-        //denomi - mianownik we wzorze na promien
-        float denomi = std::abs(Bz) * std::abs(particle.charge);
-
-        if (denomi > 0.000001f) { // Sprawdzenie, czy mianownik jest bliski zero
-            float radius = (particle.mass * v) / denomi;
-            ImGui::Text("Radius (r) %f [mm]", radius);
-        }
-        else {
-            ImGui::Text("Radius (r): infinite");
-        }
-
-        //reset
-        if (ImGui::Button("Reset")) {
-            particle.Reset({ 0.0, 0.0 }, { 1.0, 0.0 });
-            // Logika wizualna - zg³aszamy ¿¹danie (retry dzia³a jak reset w symulacji)
-            retryRequested = true;
-        }
-        // Przycisk powrotu, ¿eby nie utkn¹æ w grze
-        if (ImGui::Button("Back to Menu")) {
-            appstate = AppState::MENU;
-            simulate = false; // Zatrzymujemy przy wyjœciu
         }
         ImGui::End();
     }
 
+    // Wspólna logika dla SIMULATION i GAME (z lekkimi ró¿nicami)
+    if (appstate == AppState::SIMULATION || appstate == AppState::GAME) {
 
-    if (appstate == AppState::GAME) {
-        ImGui::Begin("Game mode");
+        ImGui::Begin(appstate == AppState::SIMULATION ? "Simulation Control" : "Game Mode");
 
-        ImGui::Text("Adjust parameters to hit the target!");
-        ImGui::Separator();
-        if (target.isHit) {
-            ImGui::Separator();
-            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Target hit!");
+        if (appstate == AppState::GAME && target.isHit) {
+            ImGui::TextColored(ImVec4(0, 1, 0, 1), "TARGET HIT!");
             ImGui::Separator();
         }
 
-        //blokada inputu: parametry zablokowane gdy cz¹steczka leci lub trafiono cel
-        bool inputLocked = simulate || target.isHit;
+        bool inputLocked = (appstate == AppState::GAME && (simulate || target.isHit));
 
         if (inputLocked) {
-            ImGui::TextDisabled("Simulation running...");
+            ImGui::TextDisabled("Controls locked during flight...");
         }
         else {
             ImGui::Text("Physics parameters");
-
             ImGui::Separator();
-            ImGui::Text("Magnetic field (B)");
-            ImGui::SliderFloat("[T]", &Bz, -2.0f, 2.0f);
 
-            ImGui::Separator();
-            ImGui::Text("Mass (m)");
-            ImGui::SliderFloat("[x10^-25 kg]", &particle.mass, 0.1f, 10.0f, "%.1f");
+            // Pole Magnetyczne - teraz jako 3 komponenty
+            double bMin = -2.0;
+            double bMax = 2.0;
 
+            // --- Oœ X (Czerwony) ---
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.5f, 0.1f, 0.1f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.7f, 0.2f, 0.2f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.8f, 0.3f, 0.3f, 1.0f));
+            ImGui::SliderScalar("B_x ##bx", ImGuiDataType_Double, &B.x, &bMin, &bMax, "%.3f");
+            ImGui::PopStyleColor(3);
+
+            // --- Oœ Y (Zielony) ---
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.1f, 0.5f, 0.1f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.2f, 0.7f, 0.2f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.3f, 0.8f, 0.3f, 1.0f));
+            ImGui::SliderScalar("B_y ##by", ImGuiDataType_Double, &B.y, &bMin, &bMax, "%.3f");
+            ImGui::PopStyleColor(3);
+
+            // --- Oœ Z (Niebieski) ---
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.2f, 0.2f, 0.7f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.3f, 0.3f, 0.8f, 1.0f));
+            ImGui::SliderScalar("B_z ##bz", ImGuiDataType_Double, &B.z, &bMin, &bMax, "%.3f");
+            ImGui::PopStyleColor(3);
+
+            // Masa i ³adunek (u¿ywamy zmiennych pomocniczych, bo pola w Particle s¹ private)
             ImGui::Separator();
-            ImGui::Text("Particle charge (q)");
-            ImGui::SliderFloat("[x10^-16 C]", &particle.charge, 1.0f, 10.0f, "%.1f");
+            static float m = 0.1f;
+            static float q = 1.0f;
+
+            ImGui::Text("Mass (m) [x10^-25 kg]");
+            if (ImGui::SliderFloat("##m", &m, 0.1f, 10.0f)) {
+                particle.SetMass(m);
+                // Tutaj przyda³by siê setter w Particle, np. particle.SetMass(m);
+            }
+
+            ImGui::Text("Charge (q) [x10^-16 C]");
+            if (ImGui::SliderFloat("##q", &q, -10.0f, 10.0f)) {
+                particle.SetCharge(q);
+                // Tutaj przyda³by siê setter w Particle, np. particle.SetCharge(q);
+            }
 
             ImGui::Separator();
             ImGui::Text("Initial velocity (v)");
             static float v = 1.0f;
-            if (ImGui::SliderFloat("[x10^6 m/s]", &v, 0.1f, 5.0f, "%.1f")) {
-                particle.SetSpeed(v);
-            }
-
-            // sterowanie skal¹ (zoomem)
-            ImGui::Separator();
-            ImGui::Text("Simulation properties");
-            ImGui::Separator();
-            ImGui::Text("Zoom");
-            // Domyœlnie 8.0f Mniejsze wartoœci - przybli¿enie
-            ImGui::SliderFloat("[mm]", &worldHeight, 1.0f, 20.0f, "%.1f");
-
-            ImGui::Separator();
-
-            ImGui::Text("Time step (dt)");
-            ImGui::SliderFloat("[dt]", &dt, 0.00001f, 0.005f, "%.5f");
-
-            ImGui::Separator();
-            if (ImGui::Button("FIRE PARTICLE!", ImVec2(-1, 40))) {
-                simulate = true;
+            if (ImGui::SliderFloat("[x10^6 m/s]", &v, 0.1f, 5.0f)) {
+                particle.SetSpeed((double)v);
             }
         }
 
         ImGui::Separator();
+        ImGui::Text("Graphics:");
 
-        //denomi - mianownik we wzorze na promien
-        float denomi = std::abs(Bz) * std::abs(particle.charge);
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.8f, 0.2f, 0.6f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.9f, 0.9f, 0.3f, 0.6f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(1.0f, 1.0f, 0.4f, 0.6f));
 
-        if (denomi > 0.000001f) { // Sprawdzenie, czy mianownik jest bliski zero
-            // U¿ywamy aktualnej prêdkoœci cz¹stki do obliczeñ
-            float currentV = glm::length(particle.velocity);
-            if (currentV == 0) currentV = 1.0f;
+        int currentTrajSize = (int)particle.GetMaxTrajectorySize();
+        if (ImGui::SliderInt("Trajectory length", &currentTrajSize, 100, (int)Particle::ABSOLUTE_MAX_TRAJECTORY)) {
+            particle.SetMaxTrajectorySize((size_t)currentTrajSize);
+        }
 
-            float radius = (particle.mass * currentV) / denomi;
+        ImGui::PopStyleColor(3);
 
-            ImGui::Text("Radius (r) %f [mm]", radius);
+        ImGui::Separator();
+        ImGui::Text("Time");
+        ImGui::SliderFloat("Time step [dt]", &dt, 0.00001f, 0.005f, "%.5f");
+
+        
+        if (appstate == AppState::SIMULATION && !simulate)
+        {
+            ImGui::Separator();
+            ImGui::Text("Initial direction:");
+
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 0.3f, 0.8f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(1.0f, 0.4f, 0.9f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(1.0f, 0.6f, 0.8f, 1.0f));
+
+            // ImGui automatycznie konwertuje stopnie w UI na radiany pod maska!
+            if (ImGui::SliderAngle("Azimuth (Left/Right)", &simAngleYaw, -180.0f, 180.0f)) {
+                retryRequested = true;
+            }
+
+            if (ImGui::SliderAngle("Elevation (Up/Down)", &simAnglePitch, -89.0f, 89.0f)) {  // Ograniczamy do 89 stopni by unikn¹æ tzw. Gimbal Lock
+                retryRequested = true;
+            }
+
+            ImGui::PopStyleColor(3);
+        }
+
+        if (appstate == AppState::SIMULATION) {
+            ImGui::Separator();
+            if (ImGui::Button("Start")) simulate = true;
+            ImGui::SameLine();
+            if (ImGui::Button("Stop")) simulate = false;
+            ImGui::SameLine();
+            if (ImGui::Button("Reset")) retryRequested = true;
         }
         else {
-
-            ImGui::Text("Radius (r): infinite");
+            if (!inputLocked && ImGui::Button("FIRE!", ImVec2(-1, 40))) simulate = true;
+            if (ImGui::Button("Try Again")) { simulate = false; retryRequested = true; }
+            if (ImGui::Button("New Game")) { simulate = false; newGameRequested = true; }
         }
 
-        // pryciski steruj¹ce gr¹
+        // Obliczanie promienia (uproszczone do p³aszczyzny prostopad³ej)
+        double v_mag = glm::length(particle.GetVelocity());
+        double B_mag = glm::length(B);
+        // q i m trzeba by pobraæ z cz¹stki (dodaj gettery!)
+        // float radius = (m * v_mag) / (std::abs(q) * B_mag);
+
         ImGui::Separator();
-
-        if (ImGui::Button("Try again")) {
-            simulate = false;
-            retryRequested = true; // Tylko reset pozycji
-        }
-
-        if (ImGui::Button("New Game")) {
-            simulate = false;
-            newGameRequested = true; // Reset i nowy cel
-        }
-
-        // Przycisk powrotu, ¿eby nie utkn¹æ w grze
         if (ImGui::Button("Back to Menu")) {
             appstate = AppState::MENU;
-            simulate = false; // Zatrzymujemy przy wyjœciu
+            simulate = false;
         }
-
         ImGui::End();
     }
 
-    // Renderowanie (finalizacja klatki ImGui)
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

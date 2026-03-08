@@ -9,8 +9,8 @@ public:
     AxesRenderer();
     ~AxesRenderer();
 
-	// Rysuje osie na podstawie macierzy projekcji (skali ekranu)
-    void Draw(const glm::mat4& projection);
+    // Rysuje osie na podstawie macierzy widoku-projekcji
+    void Draw(const glm::mat4& pv);
 
 private:
     GLuint VAO, VBO;

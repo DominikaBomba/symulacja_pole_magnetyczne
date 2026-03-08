@@ -1,4 +1,5 @@
 #pragma once
+#include <glm/glm.hpp>
 #include <glad/glad.h>
 #include "Shader.h"
 
@@ -7,7 +8,7 @@ public:
     FieldRenderer();
     ~FieldRenderer();
 
-    void Draw(float Bz, float aspectRatio, bool gameMode);
+    void Draw(const glm::mat4& pv);
 
 private:
     GLuint bgVAO, bgVBO, bgEBO;
