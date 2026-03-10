@@ -73,25 +73,26 @@ void GuiController::Render(AppState& appstate, bool& simulate, glm::dvec3& B, fl
             double bMin = -2.0;
             double bMax = 2.0;
 
+			ImGui::Text("Magnetic field (B) [T]");
             // --- Oœ X (Czerwony) ---
             ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.5f, 0.1f, 0.1f, 1.0f));
             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.7f, 0.2f, 0.2f, 1.0f));
             ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.8f, 0.3f, 0.3f, 1.0f));
-            ImGui::SliderScalar("B_x ##bx", ImGuiDataType_Double, &B.x, &bMin, &bMax, "%.3f");
+            ImGui::SliderScalar("B (x) ##bx", ImGuiDataType_Double, &B.x, &bMin, &bMax, "%.3f");
             ImGui::PopStyleColor(3);
 
             // --- Oœ Y (Zielony) ---
             ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.1f, 0.5f, 0.1f, 1.0f));
             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.2f, 0.7f, 0.2f, 1.0f));
             ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.3f, 0.8f, 0.3f, 1.0f));
-            ImGui::SliderScalar("B_y ##by", ImGuiDataType_Double, &B.y, &bMin, &bMax, "%.3f");
+            ImGui::SliderScalar("B (y) ##by", ImGuiDataType_Double, &B.y, &bMin, &bMax, "%.3f");
             ImGui::PopStyleColor(3);
 
             // --- Oœ Z (Niebieski) ---
             ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.2f, 0.2f, 0.7f, 1.0f));
             ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.3f, 0.3f, 0.8f, 1.0f));
-            ImGui::SliderScalar("B_z ##bz", ImGuiDataType_Double, &B.z, &bMin, &bMax, "%.3f");
+            ImGui::SliderScalar("B (z) ##bz", ImGuiDataType_Double, &B.z, &bMin, &bMax, "%.3f");
             ImGui::PopStyleColor(3);
 
             // Masa i ³adunek (u¿ywamy zmiennych pomocniczych, bo pola w Particle s¹ private)
